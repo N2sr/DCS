@@ -3,34 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الملفات - مع Google Drive</title>
+    <title>نظام إدارة ملفات القضايا</title>
     <style>
-        /* ========== إعدادات عامة ========== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Segoe UI', 'Tahoma', sans-serif;
-            background: linear-gradient(145deg, #0b1a2e, #1a344f);
+            font-family: 'Tahoma', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
+
         .container {
-            background: #f5f7fb;
-            border-radius: 28px;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 24px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
             width: 100%;
-            max-width: 1200px;
-            padding: 35px 30px;
-            transition: 0.3s;
+            max-width: 1100px;
+            padding: 40px 35px;
+            transition: all 0.3s ease;
         }
 
-        /* ========== شاشة تسجيل الدخول ========== */
+        /* شاشة تسجيل الدخول */
         #loginScreen {
             display: flex;
             flex-direction: column;
@@ -38,67 +39,106 @@
             justify-content: center;
             text-align: center;
         }
+
         #loginScreen h1 {
-            color: #0b2a4a;
-            font-size: 2.6rem;
+            color: #1e3c72;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
             font-weight: 700;
-            margin-bottom: 8px;
         }
+
         #loginScreen p {
-            color: #4a5a6e;
+            color: #555;
             font-size: 1.1rem;
             margin-bottom: 30px;
         }
+
         .login-box {
-            background: #ffffff;
+            background: #f8f9fc;
             padding: 35px 30px;
-            border-radius: 24px;
+            border-radius: 20px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e6eaf0;
+            max-width: 420px;
+            box-shadow: inset 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid #e9edf4;
         }
+
         .login-box label {
             display: block;
             font-weight: 600;
-            color: #0b2a4a;
+            color: #1e3c72;
             margin-bottom: 10px;
             font-size: 1.1rem;
         }
-        .login-box input {
+
+        .password-wrapper {
+            position: relative;
             width: 100%;
-            padding: 16px 20px;
+        }
+
+        .password-wrapper input {
+            width: 100%;
+            padding: 15px 20px;
             border: 2px solid #dce1eb;
-            border-radius: 16px;
+            border-radius: 14px;
             font-size: 1.1rem;
+            transition: 0.3s;
             text-align: center;
             letter-spacing: 2px;
-            background: #fafcff;
-            transition: 0.3s;
+            background: white;
+            padding-left: 50px; /* مساحة لأيقونة العين */
         }
-        .login-box input:focus {
-            border-color: #1f4b7a;
+
+        .password-wrapper input:focus {
+            border-color: #2a5298;
             outline: none;
-            box-shadow: 0 0 0 5px rgba(31, 75, 122, 0.12);
+            box-shadow: 0 0 0 5px rgba(42, 82, 152, 0.12);
         }
-        .login-box button {
+
+        .toggle-password {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 5px;
+            color: #777;
+            transition: 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: #1e3c72;
+        }
+
+        .login-box button#loginBtn {
             width: 100%;
-            padding: 16px;
+            padding: 15px;
             margin-top: 22px;
-            background: #1f4b7a;
+            background: #1e3c72;
             color: #fff;
             border: none;
-            border-radius: 16px;
+            border-radius: 14px;
             font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
         }
-        .login-box button:hover {
-            background: #2a5f94;
+
+        .login-box button#loginBtn:hover:not(:disabled) {
+            background: #2a5298;
             transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(31, 75, 122, 0.3);
+            box-shadow: 0 10px 25px rgba(30, 60, 114, 0.3);
         }
+
+        .login-box button#loginBtn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
         .error-msg {
             color: #d32f2f;
             font-size: 0.95rem;
@@ -106,51 +146,53 @@
             min-height: 26px;
             font-weight: 500;
         }
-        .hint-text {
-            margin-top: 18px;
-            font-size: 0.85rem;
-            color: #6a7a8e;
-            background: #eef2f7;
-            padding: 8px 18px;
-            border-radius: 40px;
-            display: inline-block;
+
+        .error-msg a {
+            color: #d32f2f;
+            font-weight: bold;
+            text-decoration: underline;
         }
 
-        /* ========== صفحة الملفات ========== */
+        /* صفحة الملفات */
         #filesScreen {
             display: none;
             animation: fadeIn 0.6s ease;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(25px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         .files-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            margin-bottom: 32px;
-            border-bottom: 3px solid #e2e8f0;
+            margin-bottom: 35px;
+            border-bottom: 3px solid #eef2f7;
             padding-bottom: 18px;
         }
+
         .files-header h2 {
-            color: #0b2a4a;
-            font-size: 2.1rem;
+            color: #1e3c72;
+            font-size: 2rem;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
+
         .files-header h2 span {
-            background: #1f4b7a;
+            background: #1e3c72;
             color: white;
             font-size: 0.9rem;
-            padding: 4px 16px;
-            border-radius: 40px;
+            padding: 2px 14px;
+            border-radius: 30px;
         }
+
         .files-header button {
-            background: #dc3545;
+            background: #e74c3c;
             color: #fff;
             border: none;
             padding: 12px 28px;
@@ -161,31 +203,36 @@
             transition: 0.3s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
+
         .files-header button:hover {
-            background: #b02a37;
+            background: #c0392b;
             transform: scale(1.04);
-            box-shadow: 0 8px 22px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 6px 18px rgba(231, 76, 60, 0.3);
         }
+
+        /* شبكة الملفات - تصميم أنيق */
         .file-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 28px;
-            margin-top: 8px;
+            margin-top: 10px;
         }
+
         .file-card {
             background: #ffffff;
-            border-radius: 22px;
-            padding: 26px 16px 22px;
+            border-radius: 20px;
+            padding: 28px 18px 22px;
             text-align: center;
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
             border: 1px solid #eef2f7;
             transition: all 0.35s cubic-bezier(0.15, 0.75, 0.45, 1);
-            cursor: pointer;
+            cursor: default;
             position: relative;
             overflow: hidden;
         }
+
         .file-card::before {
             content: '';
             position: absolute;
@@ -193,1112 +240,299 @@
             left: 0;
             right: 0;
             height: 5px;
-            background: var(--card-color, #1f4b7a);
+            background: var(--card-color, #2a5298);
             transition: height 0.3s ease;
         }
+
         .file-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
-            border-color: #cdd9e9;
+            transform: translateY(-12px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.10);
+            border-color: transparent;
         }
+
         .file-card:hover::before {
             height: 7px;
         }
+
         .file-card .icon {
             font-size: 3.6rem;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: block;
             line-height: 1.2;
         }
+
         .file-card h3 {
-            color: #0b1f33;
+            color: #1e2a3a;
             font-size: 1.3rem;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
+
         .file-card p {
-            color: #6a7a8e;
-            font-size: 0.85rem;
-            margin-bottom: 16px;
+            color: #777;
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+            line-height: 1.5;
+            padding: 0 5px;
         }
-        .file-card .btn-open {
-            background: var(--card-color, #1f4b7a);
+
+        .file-card .btn-file {
+            background: var(--card-color, #2a5298);
             color: #fff;
             border: none;
-            padding: 10px 22px;
+            padding: 10px 24px;
             border-radius: 40px;
             font-size: 0.9rem;
             font-weight: 500;
             cursor: pointer;
             transition: 0.3s;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 160px;
-            pointer-events: auto;
-        }
-        .file-card .btn-open:hover {
-            filter: brightness(0.88);
-            transform: scale(0.96);
         }
 
-        /* ========== المودال ========== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(6px);
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            animation: fadeInOverlay 0.3s ease;
+        .file-card .btn-file:hover {
+            filter: brightness(0.9);
+            transform: scale(0.96);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
         }
-        @keyframes fadeInOverlay {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .modal-box {
-            background: #ffffff;
-            border-radius: 30px;
-            width: 100%;
-            max-width: 780px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
-            animation: slideUp 0.35s ease;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 22px 28px;
-            border-bottom: 2px solid #eef2f7;
-            flex-shrink: 0;
-        }
-        .modal-header h3 {
-            font-size: 1.6rem;
-            color: #0b2a4a;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .modal-header .close-modal {
-            background: #f1f3f6;
-            border: none;
-            font-size: 1.8rem;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: 0.3s;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-header .close-modal:hover {
-            background: #e74c3c;
-            color: white;
-            transform: rotate(90deg);
-        }
-        .modal-body {
-            padding: 22px 28px;
-            overflow-y: auto;
-            flex: 1;
-        }
-        .doc-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .doc-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f8faff;
-            padding: 14px 20px;
-            border-radius: 16px;
-            border-right: 5px solid var(--doc-color, #1f4b7a);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            transition: 0.2s;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .doc-item:hover {
-            background: #edf3fc;
-        }
-        .doc-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .doc-info .doc-icon {
-            font-size: 1.8rem;
-        }
-        .doc-info .doc-name {
-            font-weight: 600;
-            color: #0b1f33;
-            font-size: 1rem;
-        }
-        .doc-info .doc-type {
-            font-size: 0.8rem;
-            color: #6a7a8e;
-            background: #eef2f7;
-            padding: 2px 14px;
-            border-radius: 30px;
-        }
-        .doc-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .doc-actions button {
-            background: #eef2f7;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: 0.2s;
-            color: #1f4b7a;
-            white-space: nowrap;
-        }
-        .doc-actions button:hover {
-            background: #d4e0f0;
-        }
-        .doc-actions .delete-doc {
-            color: #c0392b;
-        }
-        .doc-actions .delete-doc:hover {
-            background: #fde8e8;
-        }
-        .doc-actions .download-doc {
-            color: #27ae60;
-        }
-        .doc-actions .download-doc:hover {
-            background: #e3f5e9;
-        }
-        .doc-actions .view-doc {
-            color: #2980b9;
-        }
-        .doc-actions .view-doc:hover {
-            background: #d6eaf8;
-        }
-        .doc-actions .share-doc {
-            color: #8e44ad;
-        }
-        .doc-actions .share-doc:hover {
-            background: #e8d5f5;
-        }
-        .add-doc-btn {
-            margin-top: 22px;
-            background: #1f4b7a;
-            color: white;
-            border: none;
-            padding: 14px 24px;
-            border-radius: 60px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 6px 18px rgba(31, 75, 122, 0.2);
-        }
-        .add-doc-btn:hover {
-            background: #2a5f94;
-            transform: scale(1.02);
-        }
-        .add-form {
-            display: none;
-            margin-top: 20px;
-            background: #f5f8ff;
-            padding: 22px 24px;
-            border-radius: 20px;
-            border: 1px solid #dce4f0;
-            animation: fadeIn 0.3s ease;
-        }
-        .add-form.show {
-            display: block;
-        }
-        .add-form label {
-            display: block;
-            font-weight: 600;
-            color: #0b2a4a;
-            margin-top: 14px;
-            margin-bottom: 4px;
-        }
-        .add-form input, .add-form select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #dce1eb;
-            border-radius: 14px;
-            font-size: 1rem;
-            background: white;
-            transition: 0.3s;
-        }
-        .add-form input[type="file"] {
-            padding: 10px;
-            background: #fafcff;
-            cursor: pointer;
-        }
-        .add-form input:focus, .add-form select:focus {
-            border-color: #1f4b7a;
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(31, 75, 122, 0.08);
-        }
-        .form-actions {
-            display: flex;
-            gap: 14px;
-            margin-top: 22px;
-            flex-wrap: wrap;
-        }
-        .form-actions button {
-            padding: 12px 28px;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            flex: 1;
-            min-width: 120px;
-        }
-        .btn-save {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-save:hover {
-            background: #1e8449;
-        }
-        .btn-cancel {
-            background: #eef2f7;
-            color: #2c3e50;
-        }
-        .btn-cancel:hover {
-            background: #dce4f0;
-        }
-        .empty-docs {
-            color: #8a9aa8;
+
+        .no-files {
+            grid-column: 1 / -1;
             text-align: center;
-            padding: 30px 0;
-            font-size: 1rem;
+            color: #888;
+            font-size: 1.2rem;
+            padding: 50px 0;
         }
-        .file-size {
-            font-size: 0.7rem;
-            color: #8a9aa8;
-            margin-right: 8px;
-        }
-        /* ========== مؤشر التحميل ========== */
-        .upload-progress {
-            display: none;
-            text-align: center;
-            padding: 10px;
-            color: #1f4b7a;
-            font-weight: bold;
-        }
-        .upload-progress.show {
-            display: block;
-        }
+
+        /* استجابة */
         @media (max-width: 768px) {
-            .container { padding: 20px 16px; }
-            #loginScreen h1 { font-size: 2rem; }
-            .login-box { padding: 25px 18px; }
-            .files-header { flex-direction: column; align-items: stretch; gap: 16px; }
-            .files-header h2 { justify-content: center; font-size: 1.6rem; }
-            .file-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; }
-            .modal-box { max-height: 90vh; }
-            .modal-header { padding: 16px 20px; }
-            .modal-body { padding: 16px 20px; }
-            .doc-item { flex-direction: column; align-items: stretch; }
-            .doc-actions { width: 100%; justify-content: flex-start; }
+            .container {
+                padding: 25px 18px;
+            }
+            #loginScreen h1 {
+                font-size: 2rem;
+            }
+            .login-box {
+                padding: 25px 18px;
+            }
+            .files-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 18px;
+            }
+            .files-header h2 {
+                font-size: 1.6rem;
+                justify-content: center;
+            }
+            .files-header button {
+                justify-content: center;
+                width: 100%;
+            }
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 18px;
+            }
         }
+
         @media (max-width: 480px) {
-            .file-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+            .file-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+            .file-card {
+                padding: 20px 12px 16px;
+            }
+            .file-card .icon {
+                font-size: 2.8rem;
+            }
+            .file-card h3 {
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- ===== شاشة تسجيل الدخول ===== -->
+
+    <!-- شاشة تسجيل الدخول -->
     <div id="loginScreen">
-        <h1>📁 نظام الملفات الشبكي 🌐</h1>
-        <p>ادخل كلمة السر للوصول إلى نظام القضايا</p>
+        <h1>📁 نظام الملفات</h1>
+        <p>أدخل كلمة السر للوصول إلى أرشيف القضايا</p>
         <div class="login-box">
             <label for="passwordInput">🔑 كلمة السر</label>
-            <input type="password" id="passwordInput" placeholder="•••••••" autocomplete="off">
+            <div class="password-wrapper">
+                <input type="password" id="passwordInput" placeholder="•••••••" autocomplete="off">
+                <button type="button" id="togglePassword" class="toggle-password">🙈</button>
+            </div>
             <button id="loginBtn">🚪 دخول</button>
             <div id="errorMsg" class="error-msg"></div>
-            <div class="hint-text">🔐 كلمة السر الافتراضية: 2751993</div>
+            <!-- تم حذف التلميح نهائيًا -->
         </div>
     </div>
 
-    <!-- ===== صفحة الملفات ===== -->
+    <!-- صفحة الملفات -->
     <div id="filesScreen">
         <div class="files-header">
-            <h2>📂 ملفات القضايا <span id="fileCount">0</span></h2>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button id="authGoogleBtn" style="background:#4285F4; color:white; border:none; padding:12px 28px; border-radius:40px; font-size:1rem; font-weight:600; cursor:pointer; display:none;">🔑 تفويض Google</button>
-                <button id="logoutBtn" style="background:#dc3545; color:white; border:none; padding:12px 28px; border-radius:40px; font-size:1rem; font-weight:600; cursor:pointer;">🚪 تسجيل خروج</button>
-            </div>
+            <h2>📂 ملفات القضايا <span>6</span></h2>
+            <button id="logoutBtn">🚪 تسجيل خروج</button>
         </div>
-        <div class="file-grid" id="fileGrid"></div>
-    </div>
-</div>
 
-<!-- ===== المودال ===== -->
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h3 id="modalTitle">📂 اسم الملف</h3>
-            <button class="close-modal" id="closeModal">✕</button>
-        </div>
-        <div class="modal-body" id="modalBody">
-            <div id="docListContainer">
-                <div class="doc-list" id="docList"></div>
-            </div>
-            <button class="add-doc-btn" id="addDocBtn">➕ إضافة مستند مع ملف</button>
-            <div class="add-form" id="addForm">
-                <label for="docName">✏️ اسم المستند (مطلوب)</label>
-                <input type="text" id="docName" placeholder="مثال: عقد البيع" />
-
-                <label for="docType">📋 نوع المستند (تلقائي)</label>
-                <select id="docType">
-                    <option value="PDF">📄 PDF</option>
-                    <option value="Word">📝 Word</option>
-                    <option value="Excel">📊 Excel</option>
-                    <option value="صورة">🖼️ صورة</option>
-                    <option value="نص">📃 نص</option>
-                    <option value="فيديو">🎬 فيديو</option>
-                    <option value="صوت">🎵 صوت</option>
-                    <option value="HTML">🌐 HTML</option>
-                    <option value="أخرى">📎 أخرى</option>
-                </select>
-
-                <label for="docFile">📎 اختر الملف لرفعه (جميع الصيغ مدعومة)</label>
-                <input type="file" id="docFile" 
-                       accept=".png,.jpg,.jpeg,.gif,.svg,.webp,.bmp,.tiff,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.mp3,.wav,.aac,.mp4,.avi,.mov,.mkv,.html,.htm,.txt,.rtf,.zip,.rar">
-
-                <div id="uploadProgress" class="upload-progress">⏳ جاري رفع الملف إلى Google Drive...</div>
-
-                <div class="form-actions">
-                    <button class="btn-save" id="saveDocBtn">✅ حفظ المستند</button>
-                    <button class="btn-cancel" id="cancelAddBtn">❌ إلغاء</button>
-                </div>
-            </div>
+        <div class="file-grid" id="fileGrid">
+            <!-- سيتم إدراج البطاقات بواسطة JavaScript -->
         </div>
     </div>
-</div>
 
-<!-- ===== تحميل مكتبات Google API ===== -->
-<script src="https://apis.google.com/js/api.js"></script>
-<script src="https://accounts.google.com/gsi/client"></script>
+</div>
 
 <script>
     (function() {
-        // ==============================
-        // 1. كلمة السر الثابتة
-        // ==============================
+        // كلمة السر الثابتة (لا تظهر للمستخدم)
         const CORRECT_PASSWORD = '2751993';
-        const STORAGE_KEY = 'filesAppData';
-        const LOGIN_KEY = 'isLoggedIn';
+        const MAX_ATTEMPTS = 3;
+        let attempts = 0;
 
-        // ==============================
-        // 2. إعدادات Google Drive API
-        // ==============================
-        // ⚠️ استبدل هذه القيم بقيمك من Google Cloud Console
-        const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
-        const API_KEY = 'YOUR_API_KEY';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
-        const FOLDER_NAME = 'نظام_الملفات_القضائية';
-
-        let gapiInitialized = false;
-        let gisInitialized = false;
-        let tokenClient = null;
-        let accessToken = null;
-
-        // ==============================
-        // 3. دوال التخزين المحلي
-        // ==============================
-        function saveData() {
-            try {
-                const data = {
-                    filesData: filesData,
-                    nextDocId: nextDocId
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                localStorage.setItem(LOGIN_KEY, 'true');
-            } catch (e) {
-                console.warn('فشل حفظ البيانات:', e);
-            }
-        }
-
-        function loadData() {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) {
-                    const data = JSON.parse(stored);
-                    filesData = data.filesData;
-                    nextDocId = data.nextDocId || Date.now() + 999;
-                    return true;
-                }
-            } catch (e) {
-                console.warn('فشل تحميل البيانات:', e);
-            }
-            return false;
-        }
-
-        function clearData() {
-            localStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem(LOGIN_KEY);
-        }
-
-        function isLoggedIn() {
-            return localStorage.getItem(LOGIN_KEY) === 'true';
-        }
-
-        // ==============================
-        // 4. بيانات الملفات والمستندات
-        // ==============================
-        function createInitialDocs(count, prefix) {
-            const types = ['PDF', 'Word', 'Excel', 'صورة', 'نص'];
-            const docs = [];
-            for (let i = 1; i <= count; i++) {
-                const type = types[i % types.length];
-                docs.push({
-                    id: Date.now() + i + Math.random() * 1000,
-                    name: `${prefix} مستند ${i}`,
-                    type: type,
-                    fileData: null,
-                    fileSize: null,
-                    originalName: null,
-                    mimeType: null,
-                    driveFileId: null
-                });
-            }
-            return docs;
-        }
-
-        let filesData = [
-            { id: 1, name: 'الملف الجنائي', description: 'قضايا جنائية وجرائم', icon: '⚖️', color: '#c0392b', documents: createInitialDocs(2, 'جنائي') },
-            { id: 2, name: 'الملف الشرعي', description: 'قضايا شرعية وأحوال شخصية', icon: '📜', color: '#2980b9', documents: createInitialDocs(2, 'شرعي') },
-            { id: 3, name: 'الملف الإداري', description: 'إدارة القضايا الإدارية والتراخيص', icon: '🏛️', color: '#e67e22', documents: createInitialDocs(2, 'إداري') },
-            { id: 4, name: 'الملف المدني', description: 'قضايا مدنية وتعويضات وعقود', icon: '🏠', color: '#27ae60', documents: createInitialDocs(2, 'مدني') },
-            { id: 5, name: 'الملف التجاري', description: 'قضايا تجارية وشركات', icon: '💼', color: '#8e44ad', documents: createInitialDocs(2, 'تجاري') },
-            { id: 6, name: 'الملف العمالي', description: 'قضايا عمالية ومخالفات', icon: '👷', color: '#d35400', documents: createInitialDocs(2, 'عمالي') }
+        // بيانات الملفات (كما هي سابقًا)
+        const filesData = [
+            { id: 1, name: 'ملف الجنائي', description: 'قضايا جنائية وجرائم متنوعة', icon: '⚖️', color: '#c0392b' },
+            { id: 2, name: 'ملف الشرعي', description: 'قضايا شرعية وأحوال شخصية', icon: '📜', color: '#2980b9' },
+            { id: 3, name: 'الملف الإداري', description: 'إدارة القضايا الإدارية والتراخيص', icon: '🏛️', color: '#e67e22' },
+            { id: 4, name: 'الملف المدني', description: 'قضايا مدنية وتعويضات وعقود', icon: '🏠', color: '#27ae60' },
+            { id: 5, name: 'ملف التوثيقات', description: 'توثيق العقود والمستندات الرسمية', icon: '📑', color: '#8e44ad' },
+            { id: 6, name: 'ملف الموكلين', description: 'إدارة بيانات وملفات الموكلين', icon: '👥', color: '#16a085' }
         ];
 
-        let currentFileId = null;
-        let nextDocId = Date.now() + 999;
-        let driveFolderId = null;
-
-        // ==============================
-        // 5. المراجع إلى عناصر DOM
-        // ==============================
+        // عناصر DOM
         const loginScreen = document.getElementById('loginScreen');
         const filesScreen = document.getElementById('filesScreen');
         const passwordInput = document.getElementById('passwordInput');
         const loginBtn = document.getElementById('loginBtn');
         const errorMsg = document.getElementById('errorMsg');
         const logoutBtn = document.getElementById('logoutBtn');
-        const authGoogleBtn = document.getElementById('authGoogleBtn');
         const fileGrid = document.getElementById('fileGrid');
-        const fileCount = document.getElementById('fileCount');
+        const togglePassword = document.getElementById('togglePassword');
 
-        const modalOverlay = document.getElementById('modalOverlay');
-        const closeModal = document.getElementById('closeModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const docList = document.getElementById('docList');
-        const addDocBtn = document.getElementById('addDocBtn');
-        const addForm = document.getElementById('addForm');
-        const docNameInput = document.getElementById('docName');
-        const docTypeSelect = document.getElementById('docType');
-        const docFileInput = document.getElementById('docFile');
-        const saveDocBtn = document.getElementById('saveDocBtn');
-        const cancelAddBtn = document.getElementById('cancelAddBtn');
-        const uploadProgress = document.getElementById('uploadProgress');
-
-        // ==============================
-        // 6. دوال Google Drive API
-        // ==============================
-        function initGoogleAPI() {
-            gapi.load('client', async function() {
-                try {
-                    await gapi.client.init({
-                        apiKey: API_KEY,
-                        discoveryDocs: DISCOVERY_DOCS,
-                    });
-                    gapiInitialized = true;
-                    console.log('✅ GAPI initialized');
-                    await ensureDriveFolder();
-                } catch (err) {
-                    console.error('❌ Error initializing GAPI:', err);
-                }
-            });
-
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: (resp) => {
-                    if (resp.error) {
-                        console.error('❌ Auth error:', resp);
-                        alert('فشل التفويض: ' + resp.error);
-                        return;
-                    }
-                    accessToken = resp.access_token;
-                    console.log('✅ Access token obtained');
-                    authGoogleBtn.style.display = 'none';
-                    ensureDriveFolder();
-                },
-            });
-            gisInitialized = true;
-            console.log('✅ GIS initialized');
-        }
-
-        function authorizeGoogle() {
-            if (!gisInitialized) {
-                alert('جاري تهيئة Google API، حاول مرة أخرى.');
-                return;
-            }
-            if (accessToken) {
-                console.log('✅ Already authorized');
-                authGoogleBtn.style.display = 'none';
-                ensureDriveFolder();
-                return;
-            }
-            tokenClient.requestAccessToken();
-        }
-
-        async function ensureDriveFolder() {
-            if (!accessToken) {
-                console.log('⏳ No access token, waiting for auth...');
-                return;
-            }
-            if (driveFolderId) {
-                console.log('✅ Folder already exists:', driveFolderId);
-                return;
-            }
-
-            try {
-                const searchResponse = await fetch(
-                    `https://www.googleapis.com/drive/v3/files?q=name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${accessToken}`
-                        }
-                    }
-                );
-                const searchData = await searchResponse.json();
-                if (searchData.files && searchData.files.length > 0) {
-                    driveFolderId = searchData.files[0].id;
-                    console.log('✅ Folder found:', driveFolderId);
-                    return;
-                }
-
-                const metadata = {
-                    name: FOLDER_NAME,
-                    mimeType: 'application/vnd.google-apps.folder'
-                };
-                const createResponse = await fetch(
-                    'https://www.googleapis.com/drive/v3/files',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${accessToken}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(metadata)
-                    }
-                );
-                const createData = await createResponse.json();
-                if (createData.id) {
-                    driveFolderId = createData.id;
-                    console.log('✅ Folder created:', driveFolderId);
-                } else {
-                    console.error('❌ Failed to create folder:', createData);
-                }
-            } catch (err) {
-                console.error('❌ Error ensuring folder:', err);
-            }
-        }
-
-        async function uploadToDrive(file, fileName, folderId) {
-            if (!accessToken) {
-                throw new Error('❌ لم يتم التفويض إلى Google Drive. يرجى النقر على زر "تفويض Google" أولاً.');
-            }
-
-            const targetFolderId = folderId || driveFolderId;
-            if (!targetFolderId) {
-                throw new Error('❌ لم يتم العثور على مجلد التخزين في Drive.');
-            }
-
-            const formData = new FormData();
-            const metadata = {
-                name: fileName,
-                parents: [targetFolderId]
-            };
-            formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            formData.append('file', file);
-
-            const response = await fetch(
-                'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    },
-                    body: formData
-                }
-            );
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`فشل الرفع: ${response.status} - ${errorText}`);
-            }
-
-            const data = await response.json();
-            console.log('✅ File uploaded successfully:', data);
-            return data;
-        }
-
-        function getDriveFileUrl(fileId) {
-            return `https://drive.google.com/uc?export=download&id=${fileId}`;
-        }
-
-        function viewDriveFile(fileId, fileName, mimeType) {
-            if (!fileId) {
-                alert('لا يوجد معرف للملف في Drive!');
-                return;
-            }
-            const previewUrl = `https://drive.google.com/file/d/${fileId}/view`;
-            window.open(previewUrl, '_blank');
-        }
-
-        // ==============================
-        // 7. دوال مساعدة
-        // ==============================
-        function formatFileSize(bytes) {
-            if (!bytes) return '';
-            const units = ['B', 'KB', 'MB', 'GB'];
-            let i = 0;
-            while (bytes >= 1024 && i < units.length - 1) {
-                bytes /= 1024;
-                i++;
-            }
-            return `${bytes.toFixed(1)} ${units[i]}`;
-        }
-
-        function getTypeFromFileName(fileName) {
-            const ext = fileName.split('.').pop().toLowerCase();
-            const map = {
-                'pdf': 'PDF',
-                'doc': 'Word', 'docx': 'Word',
-                'xls': 'Excel', 'xlsx': 'Excel',
-                'ppt': 'PowerPoint', 'pptx': 'PowerPoint',
-                'png': 'صورة', 'jpg': 'صورة', 'jpeg': 'صورة', 'gif': 'صورة', 'svg': 'صورة', 'webp': 'صورة', 'bmp': 'صورة',
-                'mp3': 'صوت', 'wav': 'صوت', 'aac': 'صوت',
-                'mp4': 'فيديو', 'avi': 'فيديو', 'mov': 'فيديو', 'mkv': 'فيديو',
-                'html': 'HTML', 'htm': 'HTML',
-                'txt': 'نص', 'rtf': 'نص'
-            };
-            return map[ext] || 'أخرى';
-        }
-
-        function getFileExtension(fileName) {
-            return fileName.split('.').pop().toLowerCase();
-        }
-
-        function getCurrentDoc(docId) {
-            if (!currentFileId) return null;
-            const file = filesData.find(f => f.id === currentFileId);
-            if (!file) return null;
-            return file.documents.find(d => d.id === docId) || null;
-        }
-
-        // ==============================
-        // 8. دوال العرض
-        // ==============================
+        // دالة عرض الملفات
         function renderFiles() {
-            if (!fileGrid) return;
+            fileGrid.innerHTML = '';
             if (filesData.length === 0) {
-                fileGrid.innerHTML = `<p style="text-align:center; grid-column:1/-1; color:#6a7a8e; padding:40px;">لا توجد ملفات حالياً</p>`;
-                fileCount.textContent = '0';
+                fileGrid.innerHTML = '<div class="no-files">📭 لا توجد ملفات لعرضها</div>';
                 return;
             }
-            let html = '';
+
             filesData.forEach(file => {
-                html += `
-                    <div class="file-card" style="--card-color: ${file.color};" data-file-id="${file.id}">
-                        <span class="icon">${file.icon}</span>
-                        <h3>${file.name}</h3>
-                        <p>${file.description}</p>
-                        <button class="btn-open" data-id="${file.id}">📂 فتح</button>
-                    </div>
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.style.setProperty('--card-color', file.color || '#2a5298');
+
+                card.innerHTML = `
+                    <span class="icon">${file.icon || '📄'}</span>
+                    <h3>${file.name}</h3>
+                    <p>${file.description || 'ملف قضائي'}</p>
+                    <button class="btn-file" data-id="${file.id}" style="background: ${file.color || '#2a5298'}">
+                        📂 فتح الملف
+                    </button>
                 `;
-            });
-            fileGrid.innerHTML = html;
-            fileCount.textContent = filesData.length;
 
-            document.querySelectorAll('.file-card .btn-open').forEach(btn => {
+                const btn = card.querySelector('.btn-file');
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const id = parseInt(this.getAttribute('data-id'));
-                    openFileModal(id);
+                    alert(`🔍 جاري فتح "${file.name}" ...\n(يمكنك ربط هذا الزر بالملف الفعلي لاحقاً)`);
                 });
-            });
-            document.querySelectorAll('.file-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-file-id'));
-                    openFileModal(id);
-                });
+
+                fileGrid.appendChild(card);
             });
         }
 
-        function openFileModal(fileId) {
-            const file = filesData.find(f => f.id === fileId);
-            if (!file) return;
-            currentFileId = fileId;
-            modalTitle.textContent = `${file.icon} ${file.name}`;
-            renderDocuments(file.documents);
-            addForm.classList.remove('show');
-            docNameInput.value = '';
-            docTypeSelect.value = 'PDF';
-            docFileInput.value = '';
-            uploadProgress.classList.remove('show');
-            modalOverlay.style.display = 'flex';
-        }
-
-        function renderDocuments(docs) {
-            if (!docList) return;
-            if (!docs || docs.length === 0) {
-                docList.innerHTML = `<div class="empty-docs">📭 لا توجد مستندات في هذا الملف</div>`;
-                return;
-            }
-            let html = '';
-            docs.forEach(doc => {
-                const iconMap = {
-                    'PDF': '📄', 'Word': '📝', 'Excel': '📊', 'صورة': '🖼️',
-                    'نص': '📃', 'فيديو': '🎬', 'صوت': '🎵', 'HTML': '🌐', 'أخرى': '📎'
-                };
-                const icon = iconMap[doc.type] || '📎';
-                const hasFile = doc.driveFileId ? true : false;
-                const sizeText = hasFile ? formatFileSize(doc.fileSize) : '';
-
-                html += `
-                    <div class="doc-item" data-doc-id="${doc.id}">
-                        <div class="doc-info">
-                            <span class="doc-icon">${icon}</span>
-                            <span class="doc-name">${doc.name}</span>
-                            <span class="doc-type">${doc.type}</span>
-                            ${sizeText ? `<span class="file-size">(${sizeText})</span>` : ''}
-                            ${hasFile ? '<span style="color:#27ae60; font-size:0.8rem;">☁️ في Drive</span>' : '<span style="color:#b0b8c4; font-size:0.8rem;">بدون ملف</span>'}
-                        </div>
-                        <div class="doc-actions">
-                            ${hasFile ? `<button class="view-doc" data-id="${doc.id}">👁️ عرض</button>` : ''}
-                            ${hasFile ? `<button class="download-doc" data-id="${doc.id}">📥 تحميل</button>` : ''}
-                            ${hasFile ? `<button class="share-doc" data-id="${doc.id}">📤 مشاركة</button>` : ''}
-                            <button class="delete-doc" data-id="${doc.id}">🗑️ حذف</button>
-                        </div>
-                    </div>
-                `;
-            });
-            docList.innerHTML = html;
-
-            document.querySelectorAll('.doc-item .delete-doc').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const docId = parseInt(this.getAttribute('data-id'));
-                    deleteDocument(docId);
-                });
-            });
-            document.querySelectorAll('.doc-item .download-doc').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const docId = parseInt(this.getAttribute('data-id'));
-                    downloadDocument(docId);
-                });
-            });
-            document.querySelectorAll('.doc-item .view-doc').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const docId = parseInt(this.getAttribute('data-id'));
-                    const doc = getCurrentDoc(docId);
-                    if (doc) {
-                        viewDriveFile(doc.driveFileId, doc.name, doc.mimeType);
-                    }
-                });
-            });
-            document.querySelectorAll('.doc-item .share-doc').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const docId = parseInt(this.getAttribute('data-id'));
-                    shareDocument(docId);
-                });
-            });
-        }
-
-        function deleteDocument(docId) {
-            if (!currentFileId) return;
-            const file = filesData.find(f => f.id === currentFileId);
-            if (!file) return;
-            const index = file.documents.findIndex(d => d.id === docId);
-            if (index === -1) return;
-            if (confirm('هل أنت متأكد من حذف هذا المستند؟')) {
-                file.documents.splice(index, 1);
-                renderDocuments(file.documents);
-                saveData();
-            }
-        }
-
-        function downloadDocument(docId) {
-            const doc = getCurrentDoc(docId);
-            if (!doc || !doc.driveFileId) {
-                alert('لا يوجد ملف مرفق للتحميل!');
-                return;
-            }
-            const downloadUrl = getDriveFileUrl(doc.driveFileId);
-            window.open(downloadUrl, '_blank');
-        }
-
-        async function shareDocument(docId) {
-            const doc = getCurrentDoc(docId);
-            if (!doc || !doc.driveFileId) {
-                alert('لا يوجد ملف مرفق للمشاركة!');
-                return;
-            }
-            const shareUrl = `https://drive.google.com/file/d/${doc.driveFileId}/view`;
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: doc.name,
-                        text: `📄 مشاركة مستند: ${doc.name}`,
-                        url: shareUrl
-                    });
-                } catch (err) {
-                    if (err.name !== 'AbortError') {
-                        alert('حدث خطأ أثناء المشاركة: ' + err.message);
-                    }
-                }
-            } else {
-                try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    alert('✅ تم نسخ رابط الملف إلى الحافظة!');
-                } catch (err) {
-                    alert('⚠️ لا يمكن مشاركة الملف. الرابط: ' + shareUrl);
-                }
-            }
-        }
-
-        // ==============================
-        // 9. دوال تسجيل الدخول والخروج
-        // ==============================
+        // دالة تسجيل الدخول
         function login() {
-            const password = passwordInput.value.trim();
-            if (password === CORRECT_PASSWORD) {
+            if (loginBtn.disabled) return; // ممنوع بعد الحظر
+
+            const entered = passwordInput.value.trim();
+            errorMsg.textContent = '';
+
+            if (entered === CORRECT_PASSWORD) {
+                // نجاح
                 loginScreen.style.display = 'none';
                 filesScreen.style.display = 'block';
-                errorMsg.textContent = '';
-                localStorage.setItem(LOGIN_KEY, 'true');
-                if (!loadData()) {
-                    saveData();
-                }
                 renderFiles();
                 passwordInput.value = '';
-                if (!accessToken) {
-                    authGoogleBtn.style.display = 'inline-block';
-                }
-                initGoogleAPI();
+                attempts = 0; // إعادة تعيين المحاولات
+                errorMsg.textContent = '';
+                togglePassword.textContent = '🙈';
+                passwordInput.type = 'password';
             } else {
-                errorMsg.textContent = '❌ كلمة السر غير صحيحة. حاول مرة أخرى.';
-                passwordInput.value = '';
-                passwordInput.focus();
+                // خطأ
+                attempts++;
+                if (attempts >= MAX_ATTEMPTS) {
+                    // حظر
+                    loginBtn.disabled = true;
+                    passwordInput.disabled = true;
+                    errorMsg.innerHTML = `⛔ تم حظر الدخول بسبب كثرة المحاولات الخاطئة. يرجى مراسلة البريد الإلكتروني: <a href="mailto:nasrduaim@gmail.com">nasrduaim@gmail.com</a>`;
+                } else {
+                    const remaining = MAX_ATTEMPTS - attempts;
+                    errorMsg.textContent = `❌ كلمة السر غير صحيحة. المحاولات المتبقية: ${remaining}`;
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                    passwordInput.style.animation = 'shake 0.4s ease';
+                    setTimeout(() => passwordInput.style.animation = '', 500);
+                }
             }
         }
 
+        // دالة تسجيل الخروج
         function logout() {
             filesScreen.style.display = 'none';
             loginScreen.style.display = 'flex';
-            modalOverlay.style.display = 'none';
-            currentFileId = null;
             passwordInput.value = '';
             errorMsg.textContent = '';
-            clearData();
-            accessToken = null;
-            driveFolderId = null;
-            authGoogleBtn.style.display = 'none';
+            // إعادة تعيين الحظر؟
+            loginBtn.disabled = false;
+            passwordInput.disabled = false;
+            attempts = 0;
+            setTimeout(() => passwordInput.focus(), 100);
         }
 
-        // ==============================
-        // 10. ربط الأحداث
-        // ==============================
+        // تبديل إظهار/إخفاء كلمة السر
+        togglePassword.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePassword.textContent = '👁️'; // عين مفتوحة
+            } else {
+                passwordInput.type = 'password';
+                togglePassword.textContent = '🙈'; // عين مغمضة
+            }
+            passwordInput.focus();
+        });
+
+        // تأثير الهز
+        const styleShake = document.createElement('style');
+        styleShake.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(styleShake);
+
+        // مستمعات الأحداث
         loginBtn.addEventListener('click', login);
         passwordInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') login();
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                login();
+            }
         });
         logoutBtn.addEventListener('click', logout);
-        authGoogleBtn.addEventListener('click', authorizeGoogle);
 
-        closeModal.addEventListener('click', function() {
-            modalOverlay.style.display = 'none';
-            currentFileId = null;
-            addForm.classList.remove('show');
-            uploadProgress.classList.remove('show');
-        });
-        modalOverlay.addEventListener('click', function(e) {
-            if (e.target === this) {
-                modalOverlay.style.display = 'none';
-                currentFileId = null;
-                addForm.classList.remove('show');
-                uploadProgress.classList.remove('show');
-            }
-        });
-
-        addDocBtn.addEventListener('click', function() {
-            addForm.classList.toggle('show');
-            if (addForm.classList.contains('show')) {
-                docNameInput.focus();
-            }
-            uploadProgress.classList.remove('show');
-        });
-
-        cancelAddBtn.addEventListener('click', function() {
-            addForm.classList.remove('show');
-            docNameInput.value = '';
-            docTypeSelect.value = 'PDF';
-            docFileInput.value = '';
-            uploadProgress.classList.remove('show');
-        });
-
-        saveDocBtn.addEventListener('click', function() {
-            if (!currentFileId) {
-                alert('لا يوجد ملف مفتوح!');
-                return;
-            }
-            const name = docNameInput.value.trim();
-            if (!name) {
-                alert('يرجى إدخال اسم المستند.');
-                docNameInput.focus();
-                return;
-            }
-
-            const file = docFileInput.files[0];
-            if (!file) {
-                alert('يرجى اختيار ملف للرفع.');
-                return;
-            }
-
-            if (!accessToken) {
-                alert('⚠️ يرجى النقر على زر "تفويض Google" أولاً للسماح برفع الملفات إلى Drive.');
-                return;
-            }
-
-            uploadProgress.classList.add('show');
-            saveDocBtn.disabled = true;
-
-            const ext = getFileExtension(file.name);
-            const driveFileName = `${name}.${ext}`;
-
-            uploadToDrive(file, driveFileName, driveFolderId)
-                .then(result => {
-                    const detectedType = getTypeFromFileName(file.name);
-                    const finalType = (docTypeSelect.value !== 'PDF' && docTypeSelect.value !== 'أخرى') ? docTypeSelect.value : detectedType;
-
-                    const newDoc = {
-                        id: ++nextDocId,
-                        name: name,
-                        type: finalType,
-                        fileData: null,
-                        fileSize: file.size,
-                        originalName: file.name,
-                        mimeType: file.type,
-                        driveFileId: result.id
-                    };
-
-                    const targetFile = filesData.find(f => f.id === currentFileId);
-                    if (targetFile) {
-                        targetFile.documents.push(newDoc);
-                        renderDocuments(targetFile.documents);
-                        saveData();
-                        docNameInput.value = '';
-                        docTypeSelect.value = 'PDF';
-                        docFileInput.value = '';
-                        addForm.classList.remove('show');
-                        uploadProgress.classList.remove('show');
-                        alert('✅ تم رفع الملف بنجاح إلى Google Drive!');
-                    }
-                })
-                .catch(err => {
-                    console.error('❌ Upload error:', err);
-                    alert('❌ فشل رفع الملف: ' + err.message);
-                })
-                .finally(() => {
-                    saveDocBtn.disabled = false;
-                    uploadProgress.classList.remove('show');
-                });
-        });
-
-        // ==============================
-        // 11. تهيئة الصفحة
-        // ==============================
-        function init() {
-            if (isLoggedIn()) {
-                if (loadData()) {
-                    loginScreen.style.display = 'none';
-                    filesScreen.style.display = 'block';
-                    renderFiles();
-                    initGoogleAPI();
-                    if (!accessToken) {
-                        authGoogleBtn.style.display = 'inline-block';
-                    }
-                } else {
-                    localStorage.removeItem(LOGIN_KEY);
-                    loginScreen.style.display = 'flex';
-                    filesScreen.style.display = 'none';
-                }
-            } else {
-                loginScreen.style.display = 'flex';
-                filesScreen.style.display = 'none';
-                if (!loadData()) {
-                    // keep default data
-                }
-            }
-            modalOverlay.style.display = 'none';
+        // تركيز تلقائي
+        window.addEventListener('load', function() {
             passwordInput.focus();
-        }
-
-        init();
-
-        window.addEventListener('beforeunload', function() {
-            if (isLoggedIn()) {
-                saveData();
-            }
         });
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modalOverlay.style.display === 'flex') {
-                modalOverlay.style.display = 'none';
-                currentFileId = null;
-                addForm.classList.remove('show');
-                uploadProgress.classList.remove('show');
-            }
-        });
-
-        console.log('✅ النظام جاهز مع Google Drive. كلمة السر: 2751993');
+        console.log('✅ النظام جاهز.');
     })();
 </script>
+
 </body>
 </html>
