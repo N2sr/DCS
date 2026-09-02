@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة ملفات القضايا</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tahoma', 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
@@ -20,17 +15,16 @@
             align-items: center;
             padding: 20px;
         }
-
         .container {
-            background: rgba(255, 255, 255, 0.97);
+            background: rgba(255,255,255,0.97);
             border-radius: 24px;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 25px 70px rgba(0,0,0,0.6);
             width: 100%;
             max-width: 1100px;
             padding: 40px 35px;
             transition: all 0.3s ease;
+            position: relative;
         }
-
         /* شاشة تسجيل الدخول */
         #loginScreen {
             display: flex;
@@ -39,20 +33,8 @@
             justify-content: center;
             text-align: center;
         }
-
-        #loginScreen h1 {
-            color: #1e3c72;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        #loginScreen p {
-            color: #555;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-        }
-
+        #loginScreen h1 { color: #1e3c72; font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; }
+        #loginScreen p { color: #555; font-size: 1.1rem; margin-bottom: 30px; }
         .login-box {
             background: #f8f9fc;
             padding: 35px 30px;
@@ -62,298 +44,102 @@
             box-shadow: inset 0 2px 12px rgba(0,0,0,0.04);
             border: 1px solid #e9edf4;
         }
-
-        .login-box label {
-            display: block;
-            font-weight: 600;
-            color: #1e3c72;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .password-wrapper {
-            position: relative;
-            width: 100%;
-        }
-
+        .login-box label { display: block; font-weight: 600; color: #1e3c72; margin-bottom: 10px; font-size: 1.1rem; }
+        .password-wrapper { position: relative; width: 100%; }
         .password-wrapper input {
-            width: 100%;
-            padding: 15px 20px;
-            border: 2px solid #dce1eb;
-            border-radius: 14px;
-            font-size: 1.1rem;
-            transition: 0.3s;
-            text-align: center;
-            letter-spacing: 2px;
-            background: white;
-            padding-left: 50px; /* مساحة لأيقونة العين */
+            width: 100%; padding: 15px 20px; border: 2px solid #dce1eb;
+            border-radius: 14px; font-size: 1.1rem; transition: 0.3s;
+            text-align: center; letter-spacing: 2px; background: white;
+            padding-left: 50px;
         }
-
-        .password-wrapper input:focus {
-            border-color: #2a5298;
-            outline: none;
-            box-shadow: 0 0 0 5px rgba(42, 82, 152, 0.12);
-        }
-
+        .password-wrapper input:focus { border-color: #2a5298; outline: none; box-shadow: 0 0 0 5px rgba(42,82,152,0.12); }
         .toggle-password {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5rem;
-            padding: 5px;
-            color: #777;
-            transition: 0.2s;
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; font-size: 1.5rem;
+            padding: 5px; color: #777; transition: 0.2s;
         }
-
-        .toggle-password:hover {
-            color: #1e3c72;
-        }
-
+        .toggle-password:hover { color: #1e3c72; }
         .login-box button#loginBtn {
-            width: 100%;
-            padding: 15px;
-            margin-top: 22px;
-            background: #1e3c72;
-            color: #fff;
-            border: none;
-            border-radius: 14px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
+            width: 100%; padding: 15px; margin-top: 22px; background: #1e3c72;
+            color: #fff; border: none; border-radius: 14px; font-size: 1.2rem;
+            font-weight: 600; cursor: pointer; transition: 0.3s;
         }
-
-        .login-box button#loginBtn:hover:not(:disabled) {
-            background: #2a5298;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(30, 60, 114, 0.3);
-        }
-
-        .login-box button#loginBtn:disabled {
-            background: #aaa;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .error-msg {
-            color: #d32f2f;
-            font-size: 0.95rem;
-            margin-top: 14px;
-            min-height: 26px;
-            font-weight: 500;
-        }
-
-        .error-msg a {
-            color: #d32f2f;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-
+        .login-box button#loginBtn:hover:not(:disabled) { background: #2a5298; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(30,60,114,0.3); }
+        .login-box button#loginBtn:disabled { background: #aaa; cursor: not-allowed; opacity: 0.7; }
+        .error-msg { color: #d32f2f; font-size: 0.95rem; margin-top: 14px; min-height: 26px; font-weight: 500; }
+        .error-msg a { color: #d32f2f; font-weight: bold; text-decoration: underline; }
         /* صفحة الملفات */
-        #filesScreen {
-            display: none;
-            animation: fadeIn 0.6s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(25px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        #filesScreen { display: none; animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
         .files-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 35px;
-            border-bottom: 3px solid #eef2f7;
-            padding-bottom: 18px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; margin-bottom: 35px;
+            border-bottom: 3px solid #eef2f7; padding-bottom: 18px;
         }
-
-        .files-header h2 {
-            color: #1e3c72;
-            font-size: 2rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .files-header h2 span {
-            background: #1e3c72;
-            color: white;
-            font-size: 0.9rem;
-            padding: 2px 14px;
-            border-radius: 30px;
-        }
-
+        .files-header h2 { color: #1e3c72; font-size: 2rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .files-header h2 span { background: #1e3c72; color: white; font-size: 0.9rem; padding: 2px 14px; border-radius: 30px; }
         .files-header button {
-            background: #e74c3c;
-            color: #fff;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: #e74c3c; color: #fff; border: none; padding: 12px 28px;
+            border-radius: 40px; font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: 0.3s; display: flex; align-items: center; gap: 6px;
         }
-
-        .files-header button:hover {
-            background: #c0392b;
-            transform: scale(1.04);
-            box-shadow: 0 6px 18px rgba(231, 76, 60, 0.3);
-        }
-
-        /* شبكة الملفات - تصميم أنيق */
-        .file-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 28px;
-            margin-top: 10px;
-        }
-
+        .files-header button:hover { background: #c0392b; transform: scale(1.04); box-shadow: 0 6px 18px rgba(231,76,60,0.3); }
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 28px; margin-top: 10px; }
         .file-card {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 28px 18px 22px;
-            text-align: center;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
-            border: 1px solid #eef2f7;
-            transition: all 0.35s cubic-bezier(0.15, 0.75, 0.45, 1);
-            cursor: default;
-            position: relative;
-            overflow: hidden;
+            background: #ffffff; border-radius: 20px; padding: 28px 18px 22px;
+            text-align: center; box-shadow: 0 6px 24px rgba(0,0,0,0.04);
+            border: 1px solid #eef2f7; transition: all 0.35s cubic-bezier(0.15,0.75,0.45,1);
+            cursor: pointer; position: relative; overflow: hidden;
         }
-
-        .file-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: var(--card-color, #2a5298);
-            transition: height 0.3s ease;
-        }
-
-        .file-card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.10);
-            border-color: transparent;
-        }
-
-        .file-card:hover::before {
-            height: 7px;
-        }
-
-        .file-card .icon {
-            font-size: 3.6rem;
-            margin-bottom: 12px;
-            display: block;
-            line-height: 1.2;
-        }
-
-        .file-card h3 {
-            color: #1e2a3a;
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .file-card p {
-            color: #777;
-            font-size: 0.9rem;
-            margin-bottom: 18px;
-            line-height: 1.5;
-            padding: 0 5px;
-        }
-
+        .file-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--card-color, #2a5298); transition: height 0.3s ease; }
+        .file-card:hover { transform: translateY(-12px); box-shadow: 0 20px 50px rgba(0,0,0,0.10); border-color: transparent; }
+        .file-card:hover::before { height: 7px; }
+        .file-card .icon { font-size: 3.6rem; margin-bottom: 12px; display: block; line-height: 1.2; }
+        .file-card h3 { color: #1e2a3a; font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+        .file-card p { color: #777; font-size: 0.9rem; margin-bottom: 18px; line-height: 1.5; padding: 0 5px; }
         .file-card .btn-file {
-            background: var(--card-color, #2a5298);
-            color: #fff;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.3s;
+            background: var(--card-color, #2a5298); color: #fff; border: none;
+            padding: 10px 24px; border-radius: 40px; font-size: 0.9rem;
+            font-weight: 500; cursor: pointer; transition: 0.3s;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
-
-        .file-card .btn-file:hover {
-            filter: brightness(0.9);
-            transform: scale(0.96);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+        .file-card .btn-file:hover { filter: brightness(0.9); transform: scale(0.96); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+        .no-files { grid-column: 1 / -1; text-align: center; color: #888; font-size: 1.2rem; padding: 50px 0; }
+        /* شاشات إضافية */
+        #clientsScreen, #clientFilesScreen, #searchOverlay { display: none; animation: fadeIn 0.4s ease; }
+        .search-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 80%; max-width: 600px; background: white; border-radius: 30px;
+            padding: 15px 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); z-index: 1000;
         }
-
-        .no-files {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: #888;
-            font-size: 1.2rem;
-            padding: 50px 0;
+        #searchInput {
+            width: 100%; padding: 10px 15px; border: 2px solid #1e3c72;
+            border-radius: 20px; font-size: 1.1rem;
         }
-
+        #searchResults { margin-top: 10px; max-height: 400px; overflow-y: auto; }
+        .search-result-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .search-result-item:hover { background: #f5f5f5; }
         /* استجابة */
         @media (max-width: 768px) {
-            .container {
-                padding: 25px 18px;
-            }
-            #loginScreen h1 {
-                font-size: 2rem;
-            }
-            .login-box {
-                padding: 25px 18px;
-            }
-            .files-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 18px;
-            }
-            .files-header h2 {
-                font-size: 1.6rem;
-                justify-content: center;
-            }
-            .files-header button {
-                justify-content: center;
-                width: 100%;
-            }
-            .file-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 18px;
-            }
+            .container { padding: 25px 18px; }
+            #loginScreen h1 { font-size: 2rem; }
+            .login-box { padding: 25px 18px; }
+            .files-header { flex-direction: column; align-items: stretch; gap: 18px; }
+            .files-header h2 { font-size: 1.6rem; justify-content: center; }
+            .files-header button { justify-content: center; width: 100%; }
+            .file-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; }
         }
-
         @media (max-width: 480px) {
-            .file-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 14px;
-            }
-            .file-card {
-                padding: 20px 12px 16px;
-            }
-            .file-card .icon {
-                font-size: 2.8rem;
-            }
-            .file-card h3 {
-                font-size: 1.1rem;
-            }
+            .file-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+            .file-card { padding: 20px 12px 16px; }
+            .file-card .icon { font-size: 2.8rem; }
+            .file-card h3 { font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-
     <!-- شاشة تسجيل الدخول -->
     <div id="loginScreen">
         <h1>📁 نظام الملفات</h1>
@@ -366,173 +152,286 @@
             </div>
             <button id="loginBtn">🚪 دخول</button>
             <div id="errorMsg" class="error-msg"></div>
-            <!-- تم حذف التلميح نهائيًا -->
         </div>
     </div>
 
-    <!-- صفحة الملفات -->
+    <!-- صفحة الملفات الرئيسية (الفئات) -->
     <div id="filesScreen">
         <div class="files-header">
             <h2>📂 ملفات القضايا <span>6</span></h2>
             <button id="logoutBtn">🚪 تسجيل خروج</button>
+            <button id="searchBtn">🔍 بحث</button>
         </div>
-
-        <div class="file-grid" id="fileGrid">
-            <!-- سيتم إدراج البطاقات بواسطة JavaScript -->
-        </div>
+        <div class="file-grid" id="fileGrid"></div>
     </div>
 
+    <!-- شاشة عرض الموكلين داخل فئة -->
+    <div id="clientsScreen">
+        <div class="files-header">
+            <button id="backToCategoriesBtn">🔙 رجوع للفئات</button>
+            <h2 id="categoryTitle"></h2>
+            <button id="addClientBtn">➕ إضافة موكل</button>
+        </div>
+        <div id="clientsList" class="file-grid"></div>
+    </div>
+
+    <!-- شاشة عرض ملفات موكل -->
+    <div id="clientFilesScreen">
+        <div class="files-header">
+            <button id="backToClientsBtn">🔙 رجوع للموكلين</button>
+            <h2 id="clientTitle"></h2>
+            <button id="uploadFileBtn">📤 رفع ملف</button>
+        </div>
+        <input type="file" id="fileInput" multiple style="display:none;">
+        <div id="clientFilesList" class="file-grid"></div>
+    </div>
+
+    <!-- شريط البحث -->
+    <div id="searchOverlay">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="ابحث عن موكل...">
+            <div id="searchResults"></div>
+        </div>
+    </div>
 </div>
 
 <script>
-    (function() {
-        // كلمة السر الثابتة (لا تظهر للمستخدم)
-        const CORRECT_PASSWORD = '2751993';
-        const MAX_ATTEMPTS = 3;
-        let attempts = 0;
+(function() {
+    // ====== الإعدادات ======
+    const CORRECT_PASSWORD = '2751993';
+    const MAX_ATTEMPTS = 3;
+    let attempts = 0;
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzbKlSCP8mrg2kg6lviIOPrBeUnXBJRsEn3QxWU8HpAWuYuGxDKxtYZ386jqsHrGwBN/exec';
 
-        // بيانات الملفات (كما هي سابقًا)
-        const filesData = [
-            { id: 1, name: 'ملف الجنائي', description: 'قضايا جنائية وجرائم متنوعة', icon: '⚖️', color: '#c0392b' },
-            { id: 2, name: 'ملف الشرعي', description: 'قضايا شرعية وأحوال شخصية', icon: '📜', color: '#2980b9' },
-            { id: 3, name: 'الملف الإداري', description: 'إدارة القضايا الإدارية والتراخيص', icon: '🏛️', color: '#e67e22' },
-            { id: 4, name: 'الملف المدني', description: 'قضايا مدنية وتعويضات وعقود', icon: '🏠', color: '#27ae60' },
-            { id: 5, name: 'ملف التوثيقات', description: 'توثيق العقود والمستندات الرسمية', icon: '📑', color: '#8e44ad' },
-            { id: 6, name: 'ملف الموكلين', description: 'إدارة بيانات وملفات الموكلين', icon: '👥', color: '#16a085' }
-        ];
+    // بيانات الفئات
+    const categoriesData = [
+        { id: 1, name: 'الملف الجنائي', icon: '⚖️', color: '#c0392b' },
+        { id: 2, name: 'الملف الشرعي', icon: '📜', color: '#2980b9' },
+        { id: 3, name: 'الملف الإداري', icon: '🏛️', color: '#e67e22' },
+        { id: 4, name: 'الملف المدني', icon: '🏠', color: '#27ae60' },
+        { id: 5, name: 'ملف التوثيقات', icon: '📑', color: '#8e44ad' },
+        { id: 6, name: 'ملف الموكلين', icon: '👥', color: '#16a085' }
+    ];
 
-        // عناصر DOM
-        const loginScreen = document.getElementById('loginScreen');
-        const filesScreen = document.getElementById('filesScreen');
-        const passwordInput = document.getElementById('passwordInput');
-        const loginBtn = document.getElementById('loginBtn');
-        const errorMsg = document.getElementById('errorMsg');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const fileGrid = document.getElementById('fileGrid');
-        const togglePassword = document.getElementById('togglePassword');
+    // عناصر DOM
+    const loginScreen = document.getElementById('loginScreen');
+    const filesScreen = document.getElementById('filesScreen');
+    const clientsScreen = document.getElementById('clientsScreen');
+    const clientFilesScreen = document.getElementById('clientFilesScreen');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const searchBtn = document.getElementById('searchBtn');
+    const fileGrid = document.getElementById('fileGrid');
+    const togglePassword = document.getElementById('togglePassword');
+    const categoryTitle = document.getElementById('categoryTitle');
+    const clientsList = document.getElementById('clientsList');
+    const clientTitle = document.getElementById('clientTitle');
+    const clientFilesList = document.getElementById('clientFilesList');
+    const fileInput = document.getElementById('fileInput');
+    const searchOverlay = document.getElementById('searchOverlay');
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
 
-        // دالة عرض الملفات
-        function renderFiles() {
-            fileGrid.innerHTML = '';
-            if (filesData.length === 0) {
-                fileGrid.innerHTML = '<div class="no-files">📭 لا توجد ملفات لعرضها</div>';
-                return;
-            }
-
-            filesData.forEach(file => {
-                const card = document.createElement('div');
-                card.className = 'file-card';
-                card.style.setProperty('--card-color', file.color || '#2a5298');
-
-                card.innerHTML = `
-                    <span class="icon">${file.icon || '📄'}</span>
-                    <h3>${file.name}</h3>
-                    <p>${file.description || 'ملف قضائي'}</p>
-                    <button class="btn-file" data-id="${file.id}" style="background: ${file.color || '#2a5298'}">
-                        📂 فتح الملف
-                    </button>
-                `;
-
-                const btn = card.querySelector('.btn-file');
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    alert(`🔍 جاري فتح "${file.name}" ...\n(يمكنك ربط هذا الزر بالملف الفعلي لاحقاً)`);
-                });
-
-                fileGrid.appendChild(card);
+    // ====== دالة عرض الفئات ======
+    function renderCategories() {
+        fileGrid.innerHTML = '';
+        categoriesData.forEach(cat => {
+            const card = document.createElement('div');
+            card.className = 'file-card';
+            card.style.setProperty('--card-color', cat.color);
+            card.innerHTML = `
+                <span class="icon">${cat.icon}</span>
+                <h3>${cat.name}</h3>
+                <p>إدارة قضايا ${cat.name}</p>
+                <button class="btn-file" style="background: ${cat.color}">📂 فتح</button>
+            `;
+            card.querySelector('.btn-file').addEventListener('click', () => {
+                showCategoryClients(cat.name);
             });
-        }
+            fileGrid.appendChild(card);
+        });
+    }
 
-        // دالة تسجيل الدخول
-        function login() {
-            if (loginBtn.disabled) return; // ممنوع بعد الحظر
+    // ====== الانتقال إلى شاشة الموكلين ======
+    function showCategoryClients(categoryName) {
+        filesScreen.style.display = 'none';
+        clientsScreen.style.display = 'block';
+        clientFilesScreen.style.display = 'none';
+        categoryTitle.textContent = '📁 ' + categoryName;
 
-            const entered = passwordInput.value.trim();
-            errorMsg.textContent = '';
-
-            if (entered === CORRECT_PASSWORD) {
-                // نجاح
-                loginScreen.style.display = 'none';
-                filesScreen.style.display = 'block';
-                renderFiles();
-                passwordInput.value = '';
-                attempts = 0; // إعادة تعيين المحاولات
-                errorMsg.textContent = '';
-                togglePassword.textContent = '🙈';
-                passwordInput.type = 'password';
-            } else {
-                // خطأ
-                attempts++;
-                if (attempts >= MAX_ATTEMPTS) {
-                    // حظر
-                    loginBtn.disabled = true;
-                    passwordInput.disabled = true;
-                    errorMsg.innerHTML = `⛔ تم حظر الدخول بسبب كثرة المحاولات الخاطئة. يرجى مراسلة البريد الإلكتروني: <a href="mailto:nasrduaim@gmail.com">nasrduaim@gmail.com</a>`;
+        fetch(`${API_URL}?action=getClients&category=${encodeURIComponent(categoryName)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    renderClientsList(data.clients, categoryName);
                 } else {
-                    const remaining = MAX_ATTEMPTS - attempts;
-                    errorMsg.textContent = `❌ كلمة السر غير صحيحة. المحاولات المتبقية: ${remaining}`;
-                    passwordInput.value = '';
-                    passwordInput.focus();
-                    passwordInput.style.animation = 'shake 0.4s ease';
-                    setTimeout(() => passwordInput.style.animation = '', 500);
+                    alert('حدث خطأ: ' + data.error);
+                    clientsList.innerHTML = '<div class="no-files">تعذر تحميل الموكلين.</div>';
                 }
-            }
+            })
+            .catch(err => {
+                alert('خطأ في الاتصال بالخادم');
+                clientsList.innerHTML = '<div class="no-files">خطأ في الاتصال.</div>';
+            });
+    }
+
+    function renderClientsList(clients, categoryName) {
+        clientsList.innerHTML = '';
+        if (!clients || clients.length === 0) {
+            clientsList.innerHTML = '<div class="no-files">لا يوجد موكلون بعد. اضغط "إضافة موكل" للبدء.</div>';
+            return;
         }
+        clients.forEach(client => {
+            const card = document.createElement('div');
+            card.className = 'file-card';
+            card.style.setProperty('--card-color', '#3498db');
+            card.innerHTML = `
+                <span class="icon">👤</span>
+                <h3>${client.name}</h3>
+                <p>تاريخ الإنشاء: ${new Date(client.dateCreated).toLocaleDateString('ar-EG')}</p>
+                <button class="btn-file">📂 فتح الملف</button>
+            `;
+            card.querySelector('.btn-file').addEventListener('click', () => {
+                showClientFiles(categoryName, client.name);
+            });
+            clientsList.appendChild(card);
+        });
+    }
 
-        // دالة تسجيل الخروج
-        function logout() {
-            filesScreen.style.display = 'none';
-            loginScreen.style.display = 'flex';
-            passwordInput.value = '';
-            errorMsg.textContent = '';
-            // إعادة تعيين الحظر؟
-            loginBtn.disabled = false;
-            passwordInput.disabled = false;
-            attempts = 0;
-            setTimeout(() => passwordInput.focus(), 100);
+    // ====== إضافة موكل ======
+    document.getElementById('addClientBtn').addEventListener('click', () => {
+        const categoryName = categoryTitle.textContent.replace('📁 ', '');
+        const clientName = prompt('أدخل اسم الموكل:');
+        if (clientName && clientName.trim()) {
+            fetch(`${API_URL}?action=createClient&category=${encodeURIComponent(categoryName)}&clientName=${encodeURIComponent(clientName.trim())}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showCategoryClients(categoryName);
+                    } else {
+                        alert('فشل إنشاء الموكل: ' + data.error);
+                    }
+                })
+                .catch(err => alert('خطأ في الاتصال'));
         }
+    });
 
-        // تبديل إظهار/إخفاء كلمة السر
-        togglePassword.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                togglePassword.textContent = '👁️'; // عين مفتوحة
-            } else {
-                passwordInput.type = 'password';
-                togglePassword.textContent = '🙈'; // عين مغمضة
-            }
-            passwordInput.focus();
+    // ====== عرض ملفات موكل ======
+    function showClientFiles(categoryName, clientName) {
+        clientsScreen.style.display = 'none';
+        clientFilesScreen.style.display = 'block';
+        clientTitle.textContent = '👤 ' + clientName;
+
+        fetch(`${API_URL}?action=getClientFiles&category=${encodeURIComponent(categoryName)}&clientName=${encodeURIComponent(clientName)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    renderClientFiles(data.files);
+                } else {
+                    alert('خطأ: ' + data.error);
+                    clientFilesList.innerHTML = '<div class="no-files">تعذر تحميل الملفات.</div>';
+                }
+            })
+            .catch(err => {
+                alert('خطأ في الاتصال');
+                clientFilesList.innerHTML = '<div class="no-files">خطأ في الاتصال.</div>';
+            });
+    }
+
+    function renderClientFiles(files) {
+        clientFilesList.innerHTML = '';
+        if (!files || files.length === 0) {
+            clientFilesList.innerHTML = '<div class="no-files">لا توجد ملفات مرفوعة بعد.</div>';
+            return;
+        }
+        files.forEach(file => {
+            const card = document.createElement('div');
+            card.className = 'file-card';
+            card.style.setProperty('--card-color', '#7f8c8d');
+            const icon = getFileIcon(file.mimeType);
+            card.innerHTML = `
+                <span class="icon">${icon}</span>
+                <h3>${file.name}</h3>
+                <p>الحجم: ${(file.size / 1024).toFixed(2)} كيلوبايت</p>
+                <button class="btn-file">⬇️ تحميل</button>
+            `;
+            card.querySelector('.btn-file').addEventListener('click', () => {
+                window.open(file.url, '_blank');
+            });
+            clientFilesList.appendChild(card);
         });
+    }
 
-        // تأثير الهز
-        const styleShake = document.createElement('style');
-        styleShake.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-10px); }
-                75% { transform: translateX(10px); }
-            }
-        `;
-        document.head.appendChild(styleShake);
+    function getFileIcon(mimeType) {
+        if (mimeType.startsWith('image/')) return '🖼️';
+        if (mimeType.includes('pdf')) return '📄';
+        if (mimeType.includes('word')) return '📝';
+        if (mimeType.includes('excel') || mimeType.includes('sheet')) return '📊';
+        if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return '📽️';
+        if (mimeType.startsWith('audio/')) return '🎵';
+        if (mimeType.startsWith('video/')) return '🎬';
+        if (mimeType === 'text/plain') return '📃';
+        return '📎';
+    }
 
-        // مستمعات الأحداث
-        loginBtn.addEventListener('click', login);
-        passwordInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                login();
-            }
-        });
-        logoutBtn.addEventListener('click', logout);
+    // ====== رفع الملفات ======
+    document.getElementById('uploadFileBtn').addEventListener('click', () => {
+        fileInput.click();
+    });
 
-        // تركيز تلقائي
-        window.addEventListener('load', function() {
-            passwordInput.focus();
-        });
+    fileInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        if (!files.length) return;
+        const categoryName = categoryTitle.textContent.replace('📁 ', '');
+        const clientName = clientTitle.textContent.replace('👤 ', '');
+        for (let file of files) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result.split(',')[1];
+                const formData = new FormData();
+                formData.append('action', 'uploadFile');
+                formData.append('category', categoryName);
+                formData.append('clientName', clientName);
+                formData.append('fileName', file.name);
+                formData.append('fileBase64', base64);
+                formData.append('mimeType', file.type);
+                fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showClientFiles(categoryName, clientName);
+                    } else {
+                        alert('فشل رفع الملف: ' + data.error);
+                    }
+                })
+                .catch(err => alert('خطأ في رفع الملف'));
+            };
+            reader.readAsDataURL(file);
+        }
+        fileInput.value = '';
+    });
 
-        console.log('✅ النظام جاهز.');
-    })();
-</script>
+    // ====== البحث ======
+    searchBtn.addEventListener('click', () => {
+        searchOverlay.style.display = 'block';
+        searchInput.focus();
+    });
 
-</body>
-</html>
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            searchResults.innerHTML = '';
+            return;
+        }
+        fetch(`${API_URL}?action=searchClients&query=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    renderSearchResults(data.results);
+                } else {
+                    searchR
