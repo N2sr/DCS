@@ -360,4 +360,72 @@
             var catChoice = prompt('اختر الفئة:\n\n' + catList);
             if (!catChoice) return;
             var catIndex = parseInt(catChoice) - 1;
-            if (catIndex < 0 || catIndex >= categories.length) { alert('خطأ'); return
+            if (catIndex < 0 || catIndex >= categories.length) { alert('خطأ'); return; }
+            var targetCat = categories[catIndex];
+            fetch(`${API_URL}?action=getClients&category=${encodeURIComponent(targetCat)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.clients.length > 0) {
+                        var clList = '';
+                        data.clients.forEach(function(cl, i) { clList += (i+1) + ' - ' + cl.name + '\n'; });
+                        var clChoice = prompt('اختر الموكل:\n\n' + clList);
+                        if (clChoice) {
+                            var clIndex = parseInt(clChoice) - 1;
+                            if (clIndex >= 0 && clIndex < data.clients.length) {
+                                executeMoveCopy(fileId, targetCat, data.clients[clIndex].name, actionType);
+                            }
+                        }
+                    } else { alert('لا يوجد موكلون في هذه الفئة'); }
+                });
+        }
+
+        function executeMoveCopy(fileId, targetCat, targetClient, actionType) {
+            fetch(`${API_URL}?action=${actionType === 'copy' ? 'copyFile' : 'moveFile'}&fileId=${fileId}&targetCategory=${encodeURIComponent(targetCat)}&targetClient=${encodeURIComponent(targetClient)}`)
+                .then(res => res.json())
+                .then(data => { if (data.success) { alert('✅ تم بنجاح!'); loadClientFiles(); } else { alert('فشل: ' + data.error); } })
+                .catch(() => alert('خطأ'));
+        }
+
+        function copyFile(fileId) {
+            var url = `https://drive.google.com/file/d/${fileId}/view`;
+            navigator.clipboard.writeText(url).then(function() { alert('✅ تم نسخ الرابط!'); }).catch(function() { prompt('انسخ:', url); });
+        }
+
+        function deleteFile(fileId, fileName) {
+            if (confirm('حذف "' + fileName + '"؟')) {
+                fetch(`${API_URL}?action=deleteFile&fileId=${fileId}`)
+                    .then(res => res.json())
+                    .then(data => { if (data.success) { loadClientFiles(); } else { alert('فشل: ' + data.error); } });
+            }
+        }
+
+        function uploadFiles() { document.getElementById('fileInput').click(); }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            var files = e.target.files;
+            if (!files.length) return;
+            for (var i = 0; i < files.length; i++) { uploadSingleFile(files[i]); }
+            e.target.value = '';
+        });
+
+        function uploadSingleFile(file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var base64 = e.target.result.split(',')[1];
+                var formData = new FormData();
+                formData.append('action', 'uploadFile');
+                formData.append('category', currentFile);
+                formData.append('clientName', currentClient);
+                formData.append('fileName', file.name);
+                formData.append('fileBase64', base64);
+                formData.append('mimeType', file.type);
+                fetch(API_URL, { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => { if (data.success) { loadClientFiles(); } else { alert('فشل الرفع: ' + data.error); } })
+                    .catch(() => alert('خطأ في الرفع'));
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
