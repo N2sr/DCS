@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>خزنة القضايا السرية</title>
     <style>
-        /* جميع الأنماط كما هي - لم تتغير */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
         body { background-color: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
@@ -77,21 +76,10 @@
         .btn-rename:hover { background: #d97706; }
         .btn-delete:hover { background: #b91c1c; }
         .btn-preview:hover { background: #7c3aed; }
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); display: flex; justify-content: center;
-            align-items: center; z-index: 1000;
-        }
-        .modal-content {
-            background: white; border-radius: 12px; padding: 25px;
-            width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            text-align: center;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 12px; padding: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); text-align: center; }
         .modal-content h3 { margin-bottom: 15px; color: #1e293b; }
-        .modal-content select {
-            width: 100%; padding: 10px; border: 1px solid #cbd5e1;
-            border-radius: 8px; margin-bottom: 15px; font-size: 14px;
-        }
+        .modal-content select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; font-size: 14px; }
         .modal-actions { display: flex; gap: 10px; justify-content: center; }
         .modal-actions button { width: auto; padding: 10px 20px; }
         .btn-confirm { background: #2563eb; color: white; }
@@ -114,7 +102,7 @@
         <div id="errorMsg" class="error">❌ كلمة السر غير صحيحة!</div>
     </div>
 
-    <!-- صفحة الملفات الرئيسية (الفئات) -->
+    <!-- صفحة الملفات الرئيسية -->
     <div id="filesPage" class="files-container hidden">
         <div class="files-header">
             <h2>📂 ملفات القضايا</h2>
@@ -123,7 +111,7 @@
         <div class="files-grid" id="filesGrid"></div>
     </div>
 
-    <!-- صفحة الموكلين داخل فئة -->
+    <!-- صفحة الموكلين -->
     <div id="clientsPage" class="clients-container hidden">
         <button type="button" class="back-btn" onclick="goBackToFiles()">🔙 رجوع للملفات</button>
         <h2 id="clientsTitle" style="margin-bottom: 15px;"></h2>
@@ -151,13 +139,9 @@
     <!-- نافذة منبثقة للنسخ/النقل -->
     <div id="moveCopyModal" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3 id="modalTitle">نقل أو نسخ الملف</h3>
-            <select id="modalCategorySelect">
-                <option value="">-- اختر الفئة --</option>
-            </select>
-            <select id="modalClientSelect">
-                <option value="">-- اختر الموكل --</option>
-            </select>
+            <h3>نقل أو نسخ الملف</h3>
+            <select id="modalCategorySelect"><option value="">-- اختر الفئة --</option></select>
+            <select id="modalClientSelect"><option value="">-- اختر الموكل --</option></select>
             <div class="modal-actions">
                 <button class="btn-confirm" onclick="confirmMoveCopy()">تأكيد</button>
                 <button class="btn-cancel-modal" onclick="closeModal()">إلغاء</button>
@@ -166,7 +150,6 @@
     </div>
 
     <script>
-        // ======== الثوابت ========
         const CORRECT_PASSWORD = '1234';
         const API_URL = 'https://script.google.com/macros/s/AKfycbzEgKoisAITe8W0WG4bH4c8XojeBbMu2WzVYwQ3W6gyaPIKnTQUbqw5bDf_ukjSwdGYmQ/exec';
 
@@ -179,50 +162,15 @@
             { name: 'التوثيقات', icon: '📑' }
         ];
 
-        // ======== متغيرات الحالة ========
         let currentFile = '';
         let currentClient = '';
         let currentView = 'grid';
         let currentSize = 'normal';
         let allClientFiles = [];
         let longPressTimer = null;
-        let pendingAction = null; // { fileId, actionType }
+        let pendingAction = null;
 
-        // ======== دوال مساعدة للاتصال ========
-        async function apiGet(params) {
-            // params: object like { action: 'getClients', category: '...' }
-            const url = new URL(API_URL);
-            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-            try {
-                const response = await fetch(url.toString(), { cache: 'no-cache' });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-                return data;
-            } catch (err) {
-                console.error('GET error:', err);
-                throw new Error('فشل الاتصال بالخادم (GET)');
-            }
-        }
-
-        async function apiPost(payload) {
-            // payload: object with all fields including action
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    cache: 'no-cache'
-                });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json();
-                return data;
-            } catch (err) {
-                console.error('POST error:', err);
-                throw new Error('فشل الاتصال بالخادم (POST)');
-            }
-        }
-
-        // ======== وظائف التنقل ========
+        // ============ الدوال الأساسية ============
         function checkPassword() {
             var password = document.getElementById('passInput').value;
             var errorMsg = document.getElementById('errorMsg');
@@ -254,7 +202,6 @@
             document.getElementById('clientsPage').style.display = 'block';
         }
 
-        // ======== عرض الفئات ========
         function renderFiles() {
             var grid = document.getElementById('filesGrid');
             grid.innerHTML = '';
@@ -275,27 +222,20 @@
             loadClients();
         }
 
-        // ======== الموكلين ========
-        async function loadClients() {
+        function loadClients() {
             var list = document.getElementById('clientsList');
-            list.innerHTML = '<div class="loading">جاري تحميل الموكلين...</div>';
-            try {
-                const data = await apiGet({ action: 'getClients', category: currentFile });
-                if (data.success) {
-                    renderClients(data.clients);
-                } else {
-                    list.innerHTML = `<div class="no-items">تعذر تحميل الموكلين: ${data.error || 'خطأ غير معروف'}</div>`;
-                }
-            } catch (err) {
-                list.innerHTML = `<div class="no-items">${err.message}</div>`;
-            }
+            list.innerHTML = '<div class="loading">جاري التحميل...</div>';
+            fetch(`${API_URL}?action=getClients&category=${encodeURIComponent(currentFile)}`)
+                .then(res => res.json())
+                .then(data => { if (data.success) { renderClients(data.clients); } else { list.innerHTML = '<div class="no-items">خطأ: ' + (data.error || '') + '</div>'; } })
+                .catch(err => { list.innerHTML = '<div class="no-items">خطأ في الاتصال</div>'; });
         }
 
         function renderClients(clients) {
             var list = document.getElementById('clientsList');
             list.innerHTML = '';
             if (!clients || clients.length === 0) {
-                list.innerHTML = '<div class="no-items">لا يوجد موكلون بعد.</div>';
+                list.innerHTML = '<div class="no-items">لا يوجد موكلون.</div>';
                 return;
             }
             clients.forEach(function(client) {
@@ -307,27 +247,16 @@
             });
         }
 
-        async function addClient() {
+        function addClient() {
             var clientName = prompt('أدخل اسم الموكل:');
             if (clientName && clientName.trim() !== '') {
-                try {
-                    const data = await apiPost({
-                        action: 'createClient',
-                        category: currentFile,
-                        clientName: clientName.trim()
-                    });
-                    if (data.success) {
-                        loadClients();
-                    } else {
-                        alert('فشل الإضافة: ' + (data.error || 'خطأ غير معروف'));
-                    }
-                } catch (err) {
-                    alert(err.message);
-                }
+                fetch(`${API_URL}?action=createClient&category=${encodeURIComponent(currentFile)}&clientName=${encodeURIComponent(clientName.trim())}`)
+                    .then(res => res.json())
+                    .then(data => { if (data.success) { loadClients(); } else { alert('فشل: ' + data.error); } })
+                    .catch(() => alert('خطأ'));
             }
         }
 
-        // ======== ملفات الموكل ========
         function openClientFiles(clientName) {
             currentClient = clientName;
             document.getElementById('clientsPage').style.display = 'none';
@@ -336,27 +265,15 @@
             loadClientFiles();
         }
 
-        async function loadClientFiles() {
+        function loadClientFiles() {
             var list = document.getElementById('clientFilesList');
-            list.innerHTML = '<div class="loading">جاري تحميل الملفات...</div>';
-            try {
-                const data = await apiGet({
-                    action: 'getClientFiles',
-                    category: currentFile,
-                    clientName: currentClient
-                });
-                if (data.success) {
-                    allClientFiles = data.files || [];
-                    renderClientFiles(allClientFiles);
-                } else {
-                    list.innerHTML = `<div class="no-items">تعذر تحميل الملفات: ${data.error || 'خطأ غير معروف'}</div>`;
-                }
-            } catch (err) {
-                list.innerHTML = `<div class="no-items">${err.message}</div>`;
-            }
+            list.innerHTML = '<div class="loading">جاري التحميل...</div>';
+            fetch(`${API_URL}?action=getClientFiles&category=${encodeURIComponent(currentFile)}&clientName=${encodeURIComponent(currentClient)}`)
+                .then(res => res.json())
+                .then(data => { if (data.success) { renderClientFiles(data.files); } else { list.innerHTML = '<div class="no-items">خطأ: ' + (data.error || '') + '</div>'; } })
+                .catch(() => { list.innerHTML = '<div class="no-items">خطأ في الاتصال</div>'; });
         }
 
-        // ======== إعدادات العرض ========
         function setView(view) {
             currentView = view;
             document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
@@ -384,12 +301,12 @@
             return '📎';
         }
 
-        // ======== عرض الملفات ========
         function renderClientFiles(files) {
             var list = document.getElementById('clientFilesList');
             list.innerHTML = '';
+            allClientFiles = files || [];
             if (!files || files.length === 0) {
-                list.innerHTML = '<div class="no-items">لا توجد مستندات مرفوعة بعد.</div>';
+                list.innerHTML = '<div class="no-items">لا توجد مستندات.</div>';
                 return;
             }
 
@@ -410,7 +327,6 @@
                             <button class="btn-rename" onclick="event.stopPropagation(); renameFile('${file.id}', '${file.name}')">✏️</button>
                             <button class="btn-delete" onclick="event.stopPropagation(); deleteFile('${file.id}', '${file.name}')">🗑️</button>
                         </div>`;
-                    // أحداث الضغط الطويل
                     item.addEventListener('mousedown', function(e) { if (e.target.tagName !== 'BUTTON') { startLongPress(file.id, file.name); } });
                     item.addEventListener('mouseup', cancelLongPress);
                     item.addEventListener('mouseleave', cancelLongPress);
@@ -444,28 +360,17 @@
             }
         }
 
-        // ======== معاينة ========
-        function previewFile(url) {
-            window.open(url, '_blank');
-        }
+        function previewFile(url) { window.open(url, '_blank'); }
 
-        // ======== النسخ/النقل بالضغط الطويل ========
         function startLongPress(fileId, fileName) {
             longPressTimer = setTimeout(function() {
                 var action = prompt('📄 ' + fileName + '\n\n1 = نسخ\n2 = نقل\n3 = إلغاء');
-                if (action === '1') {
-                    pendingAction = { fileId: fileId, actionType: 'copy' };
-                    openMoveCopyModal();
-                } else if (action === '2') {
-                    pendingAction = { fileId: fileId, actionType: 'move' };
-                    openMoveCopyModal();
-                }
+                if (action === '1') { pendingAction = { fileId: fileId, actionType: 'copy' }; openMoveCopyModal(); }
+                else if (action === '2') { pendingAction = { fileId: fileId, actionType: 'move' }; openMoveCopyModal(); }
             }, 4000);
         }
 
-        function cancelLongPress() {
-            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-        }
+        function cancelLongPress() { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } }
 
         function openMoveCopyModal() {
             var catSelect = document.getElementById('modalCategorySelect');
@@ -481,29 +386,28 @@
             document.getElementById('moveCopyModal').classList.remove('hidden');
         }
 
-        document.getElementById('modalCategorySelect').addEventListener('change', async function() {
+        document.getElementById('modalCategorySelect').addEventListener('change', function() {
             var category = this.value;
             var clientSelect = document.getElementById('modalClientSelect');
             clientSelect.innerHTML = '<option value="">-- جاري التحميل --</option>';
             clientSelect.disabled = true;
             if (category) {
-                try {
-                    const data = await apiGet({ action: 'getClients', category: category });
-                    clientSelect.innerHTML = '<option value="">-- اختر الموكل --</option>';
-                    if (data.success && data.clients.length > 0) {
-                        data.clients.forEach(function(client) {
-                            var opt = document.createElement('option');
-                            opt.value = client.name;
-                            opt.textContent = client.name;
-                            clientSelect.appendChild(opt);
-                        });
-                        clientSelect.disabled = false;
-                    } else {
-                        clientSelect.innerHTML = '<option value="">لا يوجد موكلون</option>';
-                    }
-                } catch (err) {
-                    clientSelect.innerHTML = `<option value="">خطأ: ${err.message}</option>`;
-                }
+                fetch(`${API_URL}?action=getClients&category=${encodeURIComponent(category)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        clientSelect.innerHTML = '<option value="">-- اختر الموكل --</option>';
+                        if (data.success && data.clients.length > 0) {
+                            data.clients.forEach(function(client) {
+                                var opt = document.createElement('option');
+                                opt.value = client.name;
+                                opt.textContent = client.name;
+                                clientSelect.appendChild(opt);
+                            });
+                            clientSelect.disabled = false;
+                        } else {
+                            clientSelect.innerHTML = '<option value="">لا يوجد موكلون</option>';
+                        }
+                    });
             }
         });
 
@@ -512,124 +416,69 @@
             pendingAction = null;
         }
 
-        async function confirmMoveCopy() {
+        function confirmMoveCopy() {
             var targetCategory = document.getElementById('modalCategorySelect').value;
             var targetClient = document.getElementById('modalClientSelect').value;
-            if (!targetCategory || !targetClient) {
-                alert('الرجاء اختيار الفئة والموكل');
-                return;
-            }
-            if (pendingAction) {
-                await executeMoveCopy(pendingAction.fileId, targetCategory, targetClient, pendingAction.actionType);
-            }
+            if (!targetCategory || !targetClient) { alert('اختر الفئة والموكل'); return; }
+            if (pendingAction) { executeMoveCopy(pendingAction.fileId, targetCategory, targetClient, pendingAction.actionType); }
             closeModal();
         }
 
-        async function executeMoveCopy(fileId, targetCat, targetClient, actionType) {
-            try {
-                const data = await apiPost({
-                    action: actionType === 'copy' ? 'copyFile' : 'moveFile',
-                    fileId: fileId,
-                    targetCategory: targetCat,
-                    targetClient: targetClient
-                });
-                if (data.success) {
-                    alert('✅ تم بنجاح!');
-                    loadClientFiles();
-                } else {
-                    alert('فشل: ' + (data.error || 'خطأ غير معروف'));
-                }
-            } catch (err) {
-                alert(err.message);
-            }
+        function executeMoveCopy(fileId, targetCat, targetClient, actionType) {
+            var action = actionType === 'copy' ? 'copyFile' : 'moveFile';
+            fetch(`${API_URL}?action=${action}&fileId=${fileId}&targetCategory=${encodeURIComponent(targetCat)}&targetClient=${encodeURIComponent(targetClient)}`)
+                .then(res => res.json())
+                .then(data => { if (data.success) { alert('✅ تم!'); loadClientFiles(); } else { alert('فشل: ' + data.error); } })
+                .catch(() => alert('خطأ'));
         }
 
-        // ======== نسخ الرابط ========
         function copyFile(fileId) {
             var url = `https://drive.google.com/file/d/${fileId}/view`;
-            navigator.clipboard.writeText(url).then(function() {
-                alert('✅ تم نسخ الرابط!');
-            }).catch(function() {
-                prompt('انسخ الرابط:', url);
-            });
+            navigator.clipboard.writeText(url).then(function() { alert('✅ تم نسخ الرابط!'); }).catch(function() { prompt('انسخ:', url); });
         }
 
-        // ======== إعادة تسمية ========
-        async function renameFile(fileId, oldName) {
-            var newName = prompt('✏️ تعديل اسم الملف:\n\nالاسم الحالي: ' + oldName + '\n\nأدخل الاسم الجديد:', oldName);
+        function renameFile(fileId, oldName) {
+            var newName = prompt('✏️ الاسم الحالي: ' + oldName + '\n\nأدخل الاسم الجديد:', oldName);
             if (newName && newName.trim() !== '' && newName.trim() !== oldName) {
-                try {
-                    const data = await apiPost({
-                        action: 'renameFile',
-                        fileId: fileId,
-                        newName: newName.trim()
-                    });
-                    if (data.success) {
-                        alert('✅ تم التعديل!');
-                        loadClientFiles();
-                    } else {
-                        alert('فشل: ' + (data.error || 'خطأ غير معروف'));
-                    }
-                } catch (err) {
-                    alert(err.message);
-                }
+                fetch(`${API_URL}?action=renameFile&fileId=${fileId}&newName=${encodeURIComponent(newName.trim())}`)
+                    .then(res => res.json())
+                    .then(data => { if (data.success) { alert('✅ تم!'); loadClientFiles(); } else { alert('فشل: ' + data.error); } })
+                    .catch(() => alert('خطأ'));
             }
         }
 
-        // ======== حذف ========
-        async function deleteFile(fileId, fileName) {
+        function deleteFile(fileId, fileName) {
             if (confirm('حذف "' + fileName + '"؟')) {
-                try {
-                    const data = await apiPost({
-                        action: 'deleteFile',
-                        fileId: fileId
-                    });
-                    if (data.success) {
-                        loadClientFiles();
-                    } else {
-                        alert('فشل الحذف: ' + (data.error || 'خطأ غير معروف'));
-                    }
-                } catch (err) {
-                    alert(err.message);
-                }
+                fetch(`${API_URL}?action=deleteFile&fileId=${fileId}`)
+                    .then(res => res.json())
+                    .then(data => { if (data.success) { loadClientFiles(); } else { alert('فشل: ' + data.error); } });
             }
         }
 
-        // ======== رفع الملفات ========
-        function uploadFiles() {
-            document.getElementById('fileInput').click();
-        }
+        function uploadFiles() { document.getElementById('fileInput').click(); }
 
         document.getElementById('fileInput').addEventListener('change', function(e) {
             var files = e.target.files;
             if (!files.length) return;
-            for (var i = 0; i < files.length; i++) {
-                uploadSingleFile(files[i]);
-            }
+            for (var i = 0; i < files.length; i++) { uploadSingleFile(files[i]); }
             e.target.value = '';
         });
 
         function uploadSingleFile(file) {
             var reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = function(e) {
                 var base64 = e.target.result.split(',')[1];
-                try {
-                    const data = await apiPost({
-                        action: 'uploadFile',
-                        category: currentFile,
-                        clientName: currentClient,
-                        fileName: file.name,
-                        fileBase64: base64,
-                        mimeType: file.type
-                    });
-                    if (data.success) {
-                        loadClientFiles();
-                    } else {
-                        alert('فشل الرفع: ' + (data.error || 'خطأ غير معروف'));
-                    }
-                } catch (err) {
-                    alert(err.message);
-                }
+                var formData = new FormData();
+                formData.append('action', 'uploadFile');
+                formData.append('category', currentFile);
+                formData.append('clientName', currentClient);
+                formData.append('fileName', file.name);
+                formData.append('fileBase64', base64);
+                formData.append('mimeType', file.type);
+                fetch(API_URL, { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => { if (data.success) { loadClientFiles(); } else { alert('فشل: ' + data.error); } })
+                    .catch(() => alert('خطأ في الرفع'));
             };
             reader.readAsDataURL(file);
         }
