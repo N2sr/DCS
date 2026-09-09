@@ -1,551 +1,1036 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خزنة القضايا السرية</title>
-    <style>
-        /* الأنماط الأساسية */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
-        .icon { font-size: 40px; margin-bottom: 10px; }
-        h2 { color: #1e293b; margin-bottom: 8px; }
-        p { color: #64748b; font-size: 14px; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; margin-bottom: 15px; outline: none; text-align: center; }
-        button { width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        button:hover { background: #334155; }
-        .error { color: #ef4444; font-size: 13px; margin-top: 10px; display: none; }
-        .hidden { display: none; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة ملفات القضايا - متكامل</title>
+    <style>
+        /* ========== إعدادات عامة ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        /* حاويات عامة */
-        .files-container, .clients-container, .client-files-container { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 800px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .files-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
-        .files-header h2 { margin: 0; }
+        body {
+            font-family: 'Segoe UI', 'Tahoma', sans-serif;
+            background: linear-gradient(145deg, #0b1a2e, #1a344f);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-        /* شبكة الملفات والفئات */
-        .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .file-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
-        .file-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-color: #94a3b8; }
-        .file-card .file-icon { font-size: 35px; margin-bottom: 10px; }
-        .file-card h3 { color: #1e293b; font-size: 1.1rem; margin-bottom: 5px; }
-        .file-card p { color: #64748b; font-size: 0.8rem; margin: 0; }
+        .container {
+            background: #f5f7fb;
+            border-radius: 28px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 1200px;
+            padding: 35px 30px;
+            transition: 0.3s;
+        }
 
-        /* الموكلين */
-        .clients-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
-        .client-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
-        .client-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .client-card .client-icon { font-size: 30px; margin-bottom: 8px; }
-        .client-card h4 { color: #1e293b; font-size: 1rem; }
-        .client-card p { color: #64748b; font-size: 0.7rem; margin: 0; }
+        /* ========== شاشة تسجيل الدخول ========== */
+        #loginScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
 
-        /* أزرار عامة */
-        .back-btn { background: #64748b; margin-bottom: 15px; }
-        .back-btn:hover { background: #475569; }
-        .add-btn { background: #059669; margin-bottom: 15px; }
-        .add-btn:hover { background: #047857; }
-        .upload-btn { background: #2563eb; margin-bottom: 15px; }
-        .upload-btn:hover { background: #1d4ed8; }
+        #loginScreen h1 {
+            color: #0b2a4a;
+            font-size: 2.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
 
-        .no-items { color: #94a3b8; text-align: center; padding: 30px 0; }
-        .loading { color: #2563eb; text-align: center; padding: 20px; }
+        #loginScreen p {
+            color: #4a5a6e;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
 
-        /* أدوات العرض */
-        .view-controls { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
-        .view-btn, .size-btn { padding: 8px 15px; background: #e2e8f0; color: #1e293b; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; width: auto; }
-        .view-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
-        .size-btn.active { background: #059669; color: white; border-color: #059669; }
+        .login-box {
+            background: #ffffff;
+            padding: 35px 30px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e6eaf0;
+        }
 
-        /* شبكة الملفات */
-        .files-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .files-grid-view.size-large { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
-        .files-grid-view.size-medium { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-        .files-grid-view.size-normal { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .login-box label {
+            display: block;
+            font-weight: 600;
+            color: #0b2a4a;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
 
-        /* عرض قائمة */
-        .files-list-view { display: flex; flex-direction: column; gap: 10px; }
-        .files-list-view .file-list-item { display: flex; align-items: center; gap: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 15px; transition: 0.3s; cursor: pointer; }
-        .files-list-view .file-list-item:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); background: #fff; }
-        .files-list-view .file-list-icon { font-size: 30px; flex-shrink: 0; }
-        .files-list-view .file-list-info { flex: 1; text-align: right; }
-        .files-list-view .file-list-name { color: #1e293b; font-size: 0.9rem; font-weight: 600; word-break: break-all; }
-        .files-list-view .file-list-size { color: #64748b; font-size: 0.75rem; margin-top: 3px; }
-        .files-list-view .file-actions { display: flex; gap: 8px; flex-shrink: 0; }
-        .files-list-view .file-actions button { padding: 5px 10px; border-radius: 5px; font-size: 0.75rem; width: auto; cursor: pointer; border: none; }
+        .login-box input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #dce1eb;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            text-align: center;
+            letter-spacing: 2px;
+            background: #fafcff;
+            transition: 0.3s;
+        }
 
-        /* بطاقة ملف */
-        .file-card-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center; transition: 0.3s; position: relative; cursor: pointer; }
-        .file-card-item:hover { box-shadow: 0 5px 20px rgba(0,0,0,0.15); transform: translateY(-3px); }
-        .file-card-item.size-large .file-preview { width: 100%; height: 200px; font-size: 80px; }
-        .file-card-item.size-medium .file-preview { width: 100%; height: 140px; font-size: 50px; }
-        .file-card-item.size-normal .file-preview { width: 100%; height: 100px; font-size: 35px; }
-        .file-preview { display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 10px; overflow: hidden; background: #f1f5f9; }
-        .file-preview img { max-width: 100%; max-height: 100%; object-fit: cover; border-radius: 5px; }
-        .file-name { color: #1e293b; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; word-break: break-all; min-height: 32px; display: flex; align-items: center; justify-content: center; }
-        .file-actions-grid { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
-        .file-actions-grid button { padding: 4px 8px; border-radius: 5px; font-size: 0.7rem; width: auto; cursor: pointer; border: none; }
+        .login-box input:focus {
+            border-color: #1f4b7a;
+            outline: none;
+            box-shadow: 0 0 0 5px rgba(31, 75, 122, 0.12);
+        }
 
-        .btn-download { background: #2563eb; color: white; }
-        .btn-copy { background: #059669; color: white; }
-        .btn-rename { background: #f59e0b; color: white; }
-        .btn-delete { background: #dc2626; color: white; }
-        .btn-preview { background: #8b5cf6; color: white; }
-        .btn-download:hover { background: #1d4ed8; }
-        .btn-copy:hover { background: #047857; }
-        .btn-rename:hover { background: #d97706; }
-        .btn-delete:hover { background: #b91c1c; }
-        .btn-preview:hover { background: #7c3aed; }
+        .login-box button {
+            width: 100%;
+            padding: 16px;
+            margin-top: 22px;
+            background: #1f4b7a;
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-        /* نافذة منبثقة */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); display: flex; justify-content: center;
-            align-items: center; z-index: 1000;
-        }
-        .modal-content {
-            background: white; border-radius: 12px; padding: 25px;
-            width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-        .modal-content h3 { margin-bottom: 15px; color: #1e293b; }
-        .modal-content select {
-            width: 100%; padding: 10px; border: 1px solid #cbd5e1;
-            border-radius: 8px; margin-bottom: 15px; font-size: 14px;
-        }
-        .modal-actions { display: flex; gap: 10px; justify-content: center; }
-        .modal-actions button { width: auto; padding: 10px 20px; }
-        .btn-confirm { background: #2563eb; color: white; }
-        .btn-confirm:hover { background: #1d4ed8; }
-        .btn-cancel-modal { background: #dc2626; color: white; }
-        .btn-cancel-modal:hover { background: #b91c1c; }
-    </style>
+        .login-box button:hover {
+            background: #2a5f94;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(31, 75, 122, 0.3);
+        }
+
+        .error-msg {
+            color: #d32f2f;
+            font-size: 0.95rem;
+            margin-top: 14px;
+            min-height: 26px;
+            font-weight: 500;
+        }
+
+        .hint-text {
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: #6a7a8e;
+            background: #eef2f7;
+            padding: 8px 18px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+
+        /* ========== صفحة الملفات (الرئيسية) ========== */
+        #filesScreen {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .files-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+            border-bottom: 3px solid #e2e8f0;
+            padding-bottom: 18px;
+        }
+
+        .files-header h2 {
+            color: #0b2a4a;
+            font-size: 2.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .files-header h2 span {
+            background: #1f4b7a;
+            color: white;
+            font-size: 0.9rem;
+            padding: 4px 16px;
+            border-radius: 40px;
+        }
+
+        .files-header button {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .files-header button:hover {
+            background: #b02a37;
+            transform: scale(1.04);
+            box-shadow: 0 8px 22px rgba(220, 53, 69, 0.3);
+        }
+
+        /* شبكة الملفات */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 28px;
+            margin-top: 8px;
+        }
+
+        .file-card {
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 26px 16px 22px;
+            text-align: center;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+            border: 1px solid #eef2f7;
+            transition: all 0.35s cubic-bezier(0.15, 0.75, 0.45, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--card-color, #1f4b7a);
+            transition: height 0.3s ease;
+        }
+
+        .file-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            border-color: #cdd9e9;
+        }
+
+        .file-card:hover::before {
+            height: 7px;
+        }
+
+        .file-card .icon {
+            font-size: 3.6rem;
+            margin-bottom: 10px;
+            display: block;
+            line-height: 1.2;
+        }
+
+        .file-card h3 {
+            color: #0b1f33;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .file-card p {
+            color: #6a7a8e;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .file-card .btn-open {
+            background: var(--card-color, #1f4b7a);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 160px;
+        }
+
+        .file-card .btn-open:hover {
+            filter: brightness(0.88);
+            transform: scale(0.96);
+        }
+
+        /* ========== المودال (نافذة الملف المنبثقة) ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeInOverlay 0.3s ease;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: 30px;
+            width: 100%;
+            max-width: 780px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.35s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 28px;
+            border-bottom: 2px solid #eef2f7;
+            flex-shrink: 0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.6rem;
+            color: #0b2a4a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-header .close-modal {
+            background: #f1f3f6;
+            border: none;
+            font-size: 1.8rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-header .close-modal:hover {
+            background: #e74c3c;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 22px 28px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* قائمة المستندات */
+        .doc-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .doc-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8faff;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border-right: 5px solid var(--doc-color, #1f4b7a);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            transition: 0.2s;
+        }
+
+        .doc-item:hover {
+            background: #edf3fc;
+        }
+
+        .doc-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .doc-info .doc-icon {
+            font-size: 1.8rem;
+        }
+
+        .doc-info .doc-name {
+            font-weight: 600;
+            color: #0b1f33;
+            font-size: 1rem;
+        }
+
+        .doc-info .doc-type {
+            font-size: 0.8rem;
+            color: #6a7a8e;
+            background: #eef2f7;
+            padding: 2px 14px;
+            border-radius: 30px;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .doc-actions button {
+            background: #eef2f7;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1f4b7a;
+        }
+
+        .doc-actions button:hover {
+            background: #d4e0f0;
+        }
+
+        .doc-actions .delete-doc {
+            color: #c0392b;
+        }
+
+        .doc-actions .delete-doc:hover {
+            background: #fde8e8;
+        }
+
+        /* زر الإضافة */
+        .add-doc-btn {
+            margin-top: 22px;
+            background: #1f4b7a;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 18px rgba(31, 75, 122, 0.2);
+        }
+
+        .add-doc-btn:hover {
+            background: #2a5f94;
+            transform: scale(1.02);
+        }
+
+        /* ===== نموذج إضافة مستند (داخل المودال) ===== */
+        .add-form {
+            display: none;
+            margin-top: 20px;
+            background: #f5f8ff;
+            padding: 22px 24px;
+            border-radius: 20px;
+            border: 1px solid #dce4f0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .add-form.show {
+            display: block;
+        }
+
+        .add-form label {
+            display: block;
+            font-weight: 600;
+            color: #0b2a4a;
+            margin-top: 14px;
+            margin-bottom: 4px;
+        }
+
+        .add-form input, .add-form select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #dce1eb;
+            border-radius: 14px;
+            font-size: 1rem;
+            background: white;
+            transition: 0.3s;
+        }
+
+        .add-form input:focus, .add-form select:focus {
+            border-color: #1f4b7a;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(31, 75, 122, 0.08);
+        }
+
+        .add-form .form-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+
+        .add-form .form-actions button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .add-form .form-actions .btn-save {
+            background: #27ae60;
+            color: white;
+        }
+
+        .add-form .form-actions .btn-save:hover {
+            background: #1e8449;
+        }
+
+        .add-form .form-actions .btn-cancel {
+            background: #eef2f7;
+            color: #2c3e50;
+        }
+
+        .add-form .form-actions .btn-cancel:hover {
+            background: #dce4f0;
+        }
+
+        .empty-docs {
+            color: #8a9aa8;
+            text-align: center;
+            padding: 30px 0;
+            font-size: 1rem;
+        }
+
+        /* ========== استجابة ========== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+            #loginScreen h1 { font-size: 2rem; }
+            .login-box { padding: 25px 18px; }
+            .files-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+            .files-header h2 {
+                justify-content: center;
+                font-size: 1.6rem;
+            }
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 18px;
+            }
+            .modal-box {
+                max-height: 90vh;
+            }
+            .modal-header {
+                padding: 16px 20px;
+            }
+            .modal-body {
+                padding: 16px 20px;
+            }
+            .doc-item {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .doc-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .file-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+        }
+
+        /* ========== المساعدة ========== */
+        .file-card .btn-open {
+            pointer-events: auto;
+        }
+        .file-card {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- صفحة الدخول -->
-    <div id="loginPage" class="card">
-        <div class="icon">🔒</div>
-        <h2>الخزنة السرية</h2>
-        <p>أدخل كلمة السر لفتح الخزنة</p>
-        <input type="password" id="passInput" placeholder="أدخل كلمة السر">
-        <br><br>
-        <button type="button" onclick="checkPassword()">فتح الخزنة</button>
-        <br><br>
-        <div id="errorMsg" class="error">❌ كلمة السر غير صحيحة!</div>
-    </div>
+<div class="container">
 
-    <!-- صفحة الملفات الرئيسية (الفئات) -->
-    <div id="filesPage" class="files-container hidden">
-        <div class="files-header">
-            <h2>📂 ملفات القضايا</h2>
-            <button type="button" onclick="logout()" style="width: auto; padding: 8px 20px; background: #dc2626;">قفل الخزنة</button>
-        </div>
-        <div class="files-grid" id="filesGrid"></div>
-    </div>
+    <!-- ===== شاشة تسجيل الدخول ===== -->
+    <div id="loginScreen">
+        <h1>📁 نظام الملفات المتكامل</h1>
+        <p>أدخل كلمة السر للوصول إلى أرشيف القضايا</p>
+        <div class="login-box">
+            <label for="passwordInput">🔑 كلمة السر</label>
+            <input type="password" id="passwordInput" placeholder="•••••••" autocomplete="off">
+            <button id="loginBtn">🚪 دخول</button>
+            <div id="errorMsg" class="error-msg"></div>
+            <div class="hint-text">🔐 كلمة السر: <strong>2751993</strong></div>
+        </div>
+    </div>
 
-    <!-- صفحة الموكلين داخل فئة -->
-    <div id="clientsPage" class="clients-container hidden">
-        <button type="button" class="back-btn" onclick="goBackToFiles()">🔙 رجوع للملفات</button>
-        <h2 id="clientsTitle" style="margin-bottom: 15px;"></h2>
-        <button type="button" class="add-btn" onclick="addClient()">➕ إضافة موكل</button>
-        <div class="clients-list" id="clientsList"></div>
-    </div>
+    <!-- ===== صفحة الملفات (الرئيسية) ===== -->
+    <div id="filesScreen">
+        <div class="files-header">
+            <h2>📂 ملفات القضايا <span id="fileCount">6</span></h2>
+            <button id="logoutBtn">🚪 تسجيل خروج</button>
+        </div>
 
-    <!-- صفحة ملفات الموكل -->
-    <div id="clientFilesPage" class="client-files-container hidden">
-        <button type="button" class="back-btn" onclick="goBackToClients()">🔙 رجوع للموكلين</button>
-        <h2 id="clientFilesTitle" style="margin-bottom: 15px;"></h2>
-        <button type="button" class="upload-btn" onclick="uploadFiles()">📤 رفع مستندات</button>
-        <input type="file" id="fileInput" multiple style="display:none;">
-        <div class="view-controls">
-            <button class="view-btn active" onclick="setView('grid')" id="gridViewBtn">📦 شبكة</button>
-            <button class="view-btn" onclick="setView('list')" id="listViewBtn">📋 قائمة</button>
-            <span style="margin: 0 5px;">|</span>
-            <button class="size-btn active" onclick="setSize('normal')" id="sizeNormalBtn">عادي</button>
-            <button class="size-btn" onclick="setSize('medium')" id="sizeMediumBtn">متوسط</button>
-            <button class="size-btn" onclick="setSize('large')" id="sizeLargeBtn">كبير</button>
-        </div>
-        <div class="files-list" id="clientFilesList"></div>
-    </div>
+        <div class="file-grid" id="fileGrid">
+            <!-- سيتم إنشاؤها بواسطة JavaScript -->
+        </div>
+    </div>
 
-    <!-- نافذة منبثقة للنسخ/النقل -->
-    <div id="moveCopyModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h3 id="modalTitle">نقل أو نسخ الملف</h3>
-            <select id="modalCategorySelect">
-                <option value="">-- اختر الفئة --</option>
-            </select>
-            <select id="modalClientSelect">
-                <option value="">-- اختر الموكل --</option>
-            </select>
-            <div class="modal-actions">
-                <button class="btn-confirm" onclick="confirmMoveCopy()">تأكيد</button>
-                <button class="btn-cancel-modal" onclick="closeModal()">إلغاء</button>
-            </div>
-        </div>
-    </div>
+</div>
 
-    <script>
-        const CORRECT_PASSWORD = '1234';
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzEgKoisAITe8W0WG4bH4c8XojeBbMu2WzVYwQ3W6gyaPIKnTQUbqw5bDf_ukjSwdGYmQ/exec';
+<!-- ===== المودال (نافذة الملف المنبثقة) ===== -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">📂 اسم الملف</h3>
+            <button class="close-modal" id="closeModal">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- قائمة المستندات -->
+            <div id="docListContainer">
+                <div class="doc-list" id="docList"></div>
+            </div>
+            <!-- زر إضافة مستند -->
+            <button class="add-doc-btn" id="addDocBtn">➕ إضافة مستند</button>
 
-        const filesData = [
-            { name: 'القضايا الشرعية', icon: '📜' },
-            { name: 'القضايا الإدارية', icon: '🏛️' },
-            { name: 'القضايا الجنائية', icon: '⚖️' },
-            { name: 'القضايا المدنية', icon: '🏠' },
-            { name: 'القضايا الحقوقية', icon: '👥' },
-            { name: 'التوثيقات', icon: '📑' }
-        ];
+            <!-- نموذج الإضافة -->
+            <div class="add-form" id="addForm">
+                <label for="docName">اسم المستند</label>
+                <input type="text" id="docName" placeholder="مثال: عقد البيع" />
 
-        let currentFile = '';
-        let currentClient = '';
-        let currentView = 'grid';
-        let currentSize = 'normal';
-        let allClientFiles = [];
-        let longPressTimer = null;
-        let pendingAction = null; // { fileId, actionType }
+                <label for="docType">نوع المستند</label>
+                <select id="docType">
+                    <option value="PDF">📄 PDF</option>
+                    <option value="Word">📝 Word</option>
+                    <option value="Excel">📊 Excel</option>
+                    <option value="صورة">🖼️ صورة</option>
+                    <option value="نص">📃 نص</option>
+                    <option value="فيديو">🎬 فيديو</option>
+                    <option value="صوت">🎵 صوت</option>
+                    <option value="أخرى">📎 أخرى</option>
+                </select>
 
-        // ====== وظائف التنقل ======
-        function checkPassword() {
-            var password = document.getElementById('passInput').value;
-            var errorMsg = document.getElementById('errorMsg');
-            if (password === CORRECT_PASSWORD) {
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('filesPage').style.display = 'block';
-                errorMsg.style.display = 'none';
-                renderFiles();
-            } else {
-                errorMsg.style.display = 'block';
-                document.getElementById('passInput').value = '';
-            }
-        }
+                <div class="form-actions">
+                    <button class="btn-save" id="saveDocBtn">✅ حفظ المستند</button>
+                    <button class="btn-cancel" id="cancelAddBtn">❌ إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        function logout() {
-            document.getElementById('filesPage').style.display = 'none';
-            document.getElementById('clientsPage').style.display = 'none';
-            document.getElementById('clientFilesPage').style.display = 'none';
-            document.getElementById('loginPage').style.display = 'block';
-        }
+<script>
+    (function() {
+        // ==============================
+        // 1. كلمة السر الثابتة
+        // ==============================
+        const CORRECT_PASSWORD = '2751993';
 
-        function goBackToFiles() {
-            document.getElementById('clientsPage').style.display = 'none';
-            document.getElementById('filesPage').style.display = 'block';
-        }
+        // ==============================
+        // 2. بيانات الملفات والمستندات
+        // ==============================
+        // هيكل كل ملف: { id, name, description, icon, color, documents: [ { id, name, type } ] }
+        // سنقوم بتهيئة الملفات مع بعض المستندات التجريبية
+        function createInitialDocs(count, prefix) {
+            const types = ['PDF', 'Word', 'Excel', 'صورة', 'نص', 'فيديو', 'صوت'];
+            const docs = [];
+            for (let i = 1; i <= count; i++) {
+                const type = types[i % types.length];
+                docs.push({
+                    id: Date.now() + i + Math.random() * 100,
+                    name: `${prefix} مستند ${i}`,
+                    type: type
+                });
+            }
+            return docs;
+        }
 
-        function goBackToClients() {
-            document.getElementById('clientFilesPage').style.display = 'none';
-            document.getElementById('clientsPage').style.display = 'block';
-        }
+        // نعطي كل ملف 3 مستندات وهمية
+        const filesData = [
+            {
+                id: 1,
+                name: 'الملف الجنائي',
+                description: 'قضايا جنائية وجرائم',
+                icon: '⚖️',
+                color: '#c0392b',
+                documents: createInitialDocs(3, 'جنائي')
+            },
+            {
+                id: 2,
+                name: 'الملف الشرعي',
+                description: 'قضايا شرعية وأحوال شخصية',
+                icon: '📜',
+                color: '#2980b9',
+                documents: createInitialDocs(3, 'شرعي')
+            },
+            {
+                id: 3,
+                name: 'الملف الإداري',
+                description: 'إدارة القضايا الإدارية والتراخيص',
+                icon: '🏛️',
+                color: '#e67e22',
+                documents: createInitialDocs(3, 'إداري')
+            },
+            {
+                id: 4,
+                name: 'الملف المدني',
+                description: 'قضايا مدنية وتعويضات وعقود',
+                icon: '🏠',
+                color: '#27ae60',
+                documents: createInitialDocs(3, 'مدني')
+            },
+            {
+                id: 5,
+                name: 'ملف الموكلين',
+                description: 'إدارة بيانات وملفات الموكلين',
+                icon: '👥',
+                color: '#16a085',
+                documents: createInitialDocs(3, 'موكل')
+            },
+            {
+                id: 6,
+                name: 'ملف التوثيقات',
+                description: 'توثيق العقود والمستندات الرسمية',
+                icon: '📑',
+                color: '#8e44ad',
+                documents: createInitialDocs(3, 'توثيق')
+            }
+        ];
 
-        // ====== عرض الفئات ======
-        function renderFiles() {
-            var grid = document.getElementById('filesGrid');
-            grid.innerHTML = '';
-            filesData.forEach(function(file) {
-                var card = document.createElement('div');
-                card.className = 'file-card';
-                card.innerHTML = `<div class="file-icon">${file.icon}</div><h3>${file.name}</h3><p>اضغط لفتح الملف</p>`;
-                card.onclick = function() { openFile(file.name); };
-                grid.appendChild(card);
-            });
-        }
+        // ==============================
+        // 3. عناصر DOM
+        // ==============================
+        const loginScreen = document.getElementById('loginScreen');
+        const filesScreen = document.getElementById('filesScreen');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMsg = document.getElementById('errorMsg');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const fileGrid = document.getElementById('fileGrid');
+        const fileCountSpan = document.getElementById('fileCount');
 
-        function openFile(fileName) {
-            currentFile = fileName;
-            document.getElementById('filesPage').style.display = 'none';
-            document.getElementById('clientsPage').style.display = 'block';
-            document.getElementById('clientsTitle').textContent = '📁 ' + fileName;
-            loadClients();
-        }
+        // المودال
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const docList = document.getElementById('docList');
+        const addDocBtn = document.getElementById('addDocBtn');
+        const addForm = document.getElementById('addForm');
+        const docNameInput = document.getElementById('docName');
+        const docTypeSelect = document.getElementById('docType');
+        const saveDocBtn = document.getElementById('saveDocBtn');
+        const cancelAddBtn = document.getElementById('cancelAddBtn');
+        const closeModalBtn = document.getElementById('closeModal');
 
-        // ====== الموكلين ======
-        function loadClients() {
-            var list = document.getElementById('clientsList');
-            list.innerHTML = '<div class="loading">جاري تحميل الموكلين...</div>';
-            fetch(`${API_URL}?action=getClients&category=${encodeURIComponent(currentFile)}`)
-                .then(res => res.json())
-                .then(data => { if (data.success) { renderClients(data.clients); } else { list.innerHTML = '<div class="no-items">تعذر تحميل الموكلين.</div>'; } })
-                .catch(() => { list.innerHTML = '<div class="no-items">خطأ في الاتصال.</div>'; });
-        }
+        // متغيرات الحالة
+        let currentFileId = null; // معرف الملف المفتوح حالياً
 
-        function renderClients(clients) {
-            var list = document.getElementById('clientsList');
-            list.innerHTML = '';
-            if (!clients || clients.length === 0) {
-                list.innerHTML = '<div class="no-items">لا يوجد موكلون بعد.</div>';
-                return;
-            }
-            clients.forEach(function(client) {
-                var card = document.createElement('div');
-                card.className = 'client-card';
-                card.innerHTML = `<div class="client-icon">👤</div><h4>${client.name}</h4><p>${new Date(client.dateCreated).toLocaleDateString('ar-EG')}</p>`;
-                card.onclick = function() { openClientFiles(client.name); };
-                list.appendChild(card);
-            });
-        }
+        // ==============================
+        // 4. الوظائف الأساسية
+        // ==============================
 
-        function addClient() {
-            var clientName = prompt('أدخل اسم الموكل:');
-            if (clientName && clientName.trim() !== '') {
-                fetch(`${API_URL}?action=createClient&category=${encodeURIComponent(currentFile)}&clientName=${encodeURIComponent(clientName.trim())}`)
-                    .then(res => res.json())
-                    .then(data => { if (data.success) { loadClients(); } else { alert('فشل: ' + data.error); } })
-                    .catch(() => alert('خطأ'));
-            }
-        }
+        // عرض الملفات في الشبكة الرئيسية
+        function renderFiles() {
+            fileGrid.innerHTML = '';
+            fileCountSpan.textContent = filesData.length;
 
-        // ====== ملفات الموكل ======
-        function openClientFiles(clientName) {
-            currentClient = clientName;
-            document.getElementById('clientsPage').style.display = 'none';
-            document.getElementById('clientFilesPage').style.display = 'block';
-            document.getElementById('clientFilesTitle').textContent = '👤 ' + clientName;
-            loadClientFiles();
-        }
+            filesData.forEach(file => {
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.style.setProperty('--card-color', file.color || '#1f4b7a');
 
-        function loadClientFiles() {
-            var list = document.getElementById('clientFilesList');
-            list.innerHTML = '<div class="loading">جاري تحميل الملفات...</div>';
-            fetch(`${API_URL}?action=getClientFiles&category=${encodeURIComponent(currentFile)}&clientName=${encodeURIComponent(currentClient)}`)
-                .then(res => res.json())
-                .then(data => { if (data.success) { renderClientFiles(data.files); } else { list.innerHTML = '<div class="no-items">تعذر تحميل الملفات.</div>'; } })
-                .catch(() => { list.innerHTML = '<div class="no-items">خطأ في الاتصال.</div>'; });
-        }
+                card.innerHTML = `
+                    <span class="icon">${file.icon || '📄'}</span>
+                    <h3>${file.name}</h3>
+                    <p>${file.description || ''}</p>
+                    <button class="btn-open" data-id="${file.id}" style="background: ${file.color || '#1f4b7a'}">
+                        📂 فتح الملف
+                    </button>
+                `;
 
-        // ====== إعدادات العرض ======
-        function setView(view) {
-            currentView = view;
-            document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
-            document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
-            renderClientFiles(allClientFiles);
-        }
+                const btn = card.querySelector('.btn-open');
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    openFileModal(file.id);
+                });
 
-        function setSize(size) {
-            currentSize = size;
-            document.getElementById('sizeNormalBtn').classList.toggle('active', size === 'normal');
-            document.getElementById('sizeMediumBtn').classList.toggle('active', size === 'medium');
-            document.getElementById('sizeLargeBtn').classList.toggle('active', size === 'large');
-            renderClientFiles(allClientFiles);
-        }
+                // النقر على البطاقة نفسها يفتح الملف أيضاً
+                card.addEventListener('click', function() {
+                    openFileModal(file.id);
+                });
 
-        function getFileIcon(mimeType) {
-            if (mimeType.startsWith('image/')) return '🖼️';
-            if (mimeType.includes('pdf')) return '📄';
-            if (mimeType.includes('word')) return '📝';
-            if (mimeType.includes('excel') || mimeType.includes('sheet')) return '📊';
-            if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return '📽️';
-            if (mimeType.startsWith('audio/')) return '🎵';
-            if (mimeType.startsWith('video/')) return '🎬';
-            if (mimeType === 'text/plain') return '📃';
-            return '📎';
-        }
+                fileGrid.appendChild(card);
+            });
+        }
 
-        // ====== عرض الملفات ======
-        function renderClientFiles(files) {
-            var list = document.getElementById('clientFilesList');
-            list.innerHTML = '';
-            allClientFiles = files || [];
-            if (!files || files.length === 0) {
-                list.innerHTML = '<div class="no-items">لا توجد مستندات مرفوعة بعد.</div>';
-                return;
-            }
+        // فتح مودال الملف
+        function openFileModal(fileId) {
+            const file = filesData.find(f => f.id === fileId);
+            if (!file) return;
 
-            if (currentView === 'list') {
-                list.className = 'files-list-view';
-                files.forEach(function(file) {
-                    var item = document.createElement('div');
-                    item.className = 'file-list-item';
-                    var icon = getFileIcon(file.mimeType);
-                    var sizeKB = (file.size / 1024).toFixed(2);
-                    item.innerHTML = `
-                        <div class="file-list-icon">${icon}</div>
-                        <div class="file-list-info"><div class="file-list-name">${file.name}</div><div class="file-list-size">${sizeKB} KB</div></div>
-                        <div class="file-actions">
-                            <button class="btn-preview" onclick="event.stopPropagation(); previewFile('${file.url}')">👁️</button>
-                            <button class="btn-download" onclick="event.stopPropagation(); window.open('${file.url}', '_blank')">⬇️</button>
-                            <button class="btn-copy" onclick="event.stopPropagation(); copyFile('${file.id}')">📋</button>
-                            <button class="btn-rename" onclick="event.stopPropagation(); renameFile('${file.id}', '${file.name}')">✏️</button>
-                            <button class="btn-delete" onclick="event.stopPropagation(); deleteFile('${file.id}', '${file.name}')">🗑️</button>
-                        </div>`;
-                    item.addEventListener('mousedown', function(e) { if (e.target.tagName !== 'BUTTON') { startLongPress(file.id, file.name); } });
-                    item.addEventListener('mouseup', cancelLongPress);
-                    item.addEventListener('mouseleave', cancelLongPress);
-                    item.addEventListener('touchstart', function(e) { if (e.target.tagName !== 'BUTTON') { startLongPress(file.id, file.name); } });
-                    item.addEventListener('touchend', cancelLongPress);
-                    list.appendChild(item);
-                });
-            } else {
-                list.className = 'files-grid-view size-' + currentSize;
-                files.forEach(function(file) {
-                    var card = document.createElement('div');
-                    card.className = 'file-card-item size-' + currentSize;
-                    var previewHTML = file.mimeType.startsWith('image/') ? `<img src="${file.url}" alt="${file.name}">` : `<span style="font-size: inherit;">${getFileIcon(file.mimeType)}</span>`;
-                    card.innerHTML = `
-                        <div class="file-preview">${previewHTML}</div>
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-actions-grid">
-                            <button class="btn-preview" onclick="event.stopPropagation(); previewFile('${file.url}')">👁️</button>
-                            <button class="btn-download" onclick="event.stopPropagation(); window.open('${file.url}', '_blank')">⬇️</button>
-                            <button class="btn-copy" onclick="event.stopPropagation(); copyFile('${file.id}')">📋</button>
-                            <button class="btn-rename" onclick="event.stopPropagation(); renameFile('${file.id}', '${file.name}')">✏️</button>
-                            <button class="btn-delete" onclick="event.stopPropagation(); deleteFile('${file.id}', '${file.name}')">🗑️</button>
-                        </div>`;
-                    card.addEventListener('mousedown', function(e) { if (e.target.tagName !== 'BUTTON') { startLongPress(file.id, file.name); } });
-                    card.addEventListener('mouseup', cancelLongPress);
-                    card.addEventListener('mouseleave', cancelLongPress);
-                    card.addEventListener('touchstart', function(e) { if (e.target.tagName !== 'BUTTON') { startLongPress(file.id, file.name); } });
-                    card.addEventListener('touchend', cancelLongPress);
-                    list.appendChild(card);
-                });
-            }
-        }
+            currentFileId = fileId;
+            modalTitle.innerHTML = `${file.icon} ${file.name}`;
+            renderDocuments(file.documents);
+            // إخفاء نموذج الإضافة إن كان مفتوحاً
+            addForm.classList.remove('show');
+            // إعادة تعيين الحقول
+            docNameInput.value = '';
+            docTypeSelect.value = 'PDF';
 
-        // ====== معاينة الملف ======
-        function previewFile(url) {
-            window.open(url, '_blank');
-        }
+            modalOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // منع التمرير خلف المودال
+        }
 
-        // ====== النسخ/النقل ======
-        function startLongPress(fileId, fileName) {
-            longPressTimer = setTimeout(function() {
-                var action = prompt('📄 ' + fileName + '\n\n1 = نسخ\n2 = نقل\n3 = إلغاء');
-                if (action === '1') {
-                    pendingAction = { fileId: fileId, actionType: 'copy' };
-                    openMoveCopyModal();
-                } else if (action === '2') {
-                    pendingAction = { fileId: fileId, actionType: 'move' };
-                    openMoveCopyModal();
-                }
-            }, 4000);
-        }
+        // عرض المستندات داخل المودال
+        function renderDocuments(docs) {
+            docList.innerHTML = '';
+            if (!docs || docs.length === 0) {
+                docList.innerHTML = `<div class="empty-docs">📭 لا توجد مستندات في هذا الملف حتى الآن</div>`;
+                return;
+            }
 
-        function cancelLongPress() {
-            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-        }
+            docs.forEach(doc => {
+                const item = document.createElement('div');
+                item.className = 'doc-item';
+                // لون حسب النوع (اختياري)
+                const colorMap = {
+                    'PDF': '#e74c3c',
+                    'Word': '#2980b9',
+                    'Excel': '#27ae60',
+                    'صورة': '#f39c12',
+                    'نص': '#8e44ad',
+                    'فيديو': '#e67e22',
+                    'صوت': '#1abc9c',
+                    'أخرى': '#7f8c8d'
+                };
+                const docColor = colorMap[doc.type] || '#1f4b7a';
+                item.style.setProperty('--doc-color', docColor);
 
-        function openMoveCopyModal() {
-            // ملء قائمة الفئات
-            var catSelect = document.getElementById('modalCategorySelect');
-            catSelect.innerHTML = '<option value="">-- اختر الفئة --</option>';
-            filesData.forEach(function(cat) {
-                var opt = document.createElement('option');
-                opt.value = cat.name;
-                opt.textContent = cat.name;
-                catSelect.appendChild(opt);
-            });
-            // تعطيل الموكل حتى يتم اختيار فئة
-            document.getElementById('modalClientSelect').innerHTML = '<option value="">-- اختر الموكل --</option>';
-            document.getElementById('modalClientSelect').disabled = true;
-            document.getElementById('moveCopyModal').classList.remove('hidden');
-        }
+                // أيقونة حسب النوع
+                let icon = '📄';
+                if (doc.type === 'PDF') icon = '📄';
+                else if (doc.type === 'Word') icon = '📝';
+                else if (doc.type === 'Excel') icon = '📊';
+                else if (doc.type === 'صورة') icon = '🖼️';
+                else if (doc.type === 'نص') icon = '📃';
+                else if (doc.type === 'فيديو') icon = '🎬';
+                else if (doc.type === 'صوت') icon = '🎵';
+                else icon = '📎';
 
-        document.getElementById('modalCategorySelect').addEventListener('change', function() {
-            var category = this.value;
-            var clientSelect = document.getElementById('modalClientSelect');
-            clientSelect.innerHTML = '<option value="">-- جاري التحميل --</option>';
-            clientSelect.disabled = true;
-            if (category) {
-                fetch(`${API_URL}?action=getClients&category=${encodeURIComponent(category)}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        clientSelect.innerHTML = '<option value="">-- اختر الموكل --</option>';
-                        if (data.success && data.clients.length > 0) {
-                            data.clients.forEach(function(client) {
-                                var opt = document.createElement('option');
-                                opt.value = client.name;
-                                opt.textContent = client.name;
-                                clientSelect.appendChild(opt);
-                            });
-                            clientSelect.disabled = false;
-                        } else {
-                            clientSelect.innerHTML = '<option value="">لا يوجد موكلون</option>';
-                        }
-                    });
-            }
-        });
+                item.innerHTML = `
+                    <div class="doc-info">
+                        <span class="doc-icon">${icon}</span>
+                        <span class="doc-name">${doc.name}</span>
+                        <span class="doc-type">${doc.type}</span>
+                    </div>
+                    <div class="doc-actions">
+                        <button class="view-doc" data-id="${doc.id}">👁️ عرض</button>
+                        <button class="delete-doc" data-id="${doc.id}">🗑️ حذف</button>
+                    </div>
+                `;
 
-        function closeModal() {
-            document.getElementById('moveCopyModal').classList.add('hidden');
-            pendingAction = null;
-        }
+                // عرض المستند (محاكاة)
+                item.querySelector('.view-doc').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    alert(`📄 عرض المستند: "${doc.name}" (نوع: ${doc.type})\n(هنا يمكن فتح الملف الفعلي)`);
+                });
 
-        function confirmMoveCopy() {
-            var targetCategory = document.getElementById('modalCategorySelect').value;
-            var targetClient = document.getElementById('modalClientSelect').value;
-            if (!targetCategory || !targetClient) {
-                alert('الرجاء اختيار الفئة والموكل');
-                return;
-            }
-            if (pendingAction) {
-                executeMoveCopy(pendingAction.fileId, targetCategory, targetClient, pendingAction.actionType);
-            }
-            closeModal();
-        }
+                // حذف المستند
+                item.querySelector('.delete-doc').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm(`هل تريد حذف المستند "${doc.name}" نهائياً؟`)) {
+                        // حذف من مصفوفة المستندات الخاصة بالملف الحالي
+                        const currentFile = filesData.find(f => f.id === currentFileId);
+                        if (currentFile) {
+                            currentFile.documents = currentFile.documents.filter(d => d.id !== doc.id);
+                            renderDocuments(currentFile.documents);
+                            // تحديث عدد المستندات (اختياري)
+                        }
+                    }
+                });
 
-        function executeMoveCopy(fileId, targetCat, targetClient, actionType) {
-            var action = actionType === 'copy' ? 'copyFile' : 'moveFile';
-            fetch(`${API_URL}?action=${action}&fileId=${fileId}&targetCategory=${encodeURIComponent(targetCat)}&targetClient=${encodeURIComponent(targetClient)}`)
-                .then(res => res.json())
-                .then(data => { if (data.success) { alert('✅ تم بنجاح!'); loadClientFiles(); } else { alert('فشل: ' + data.error); } })
-                .catch(() => alert('خطأ'));
-        }
+                docList.appendChild(item);
+            });
+        }
 
-        // ====== نسخ الرابط ======
-        function copyFile(fileId) {
-            var url = `https://drive.google.com/file/d/${fileId}/view`;
-            navigator.clipboard.writeText(url).then(function() { alert('✅ تم نسخ الرابط!'); }).catch(function() { prompt('انسخ:', url); });
-        }
+        // إضافة مستند جديد
+        function addDocument() {
+            const name = docNameInput.value.trim();
+            const type = docTypeSelect.value;
+            if (!name) {
+                alert('❌ يرجى إدخال اسم المستند.');
+                return;
+            }
 
-        // ====== إعادة تسمية ======
-        function renameFile(fileId, oldName) {
-            var newName = prompt('✏️ تعديل اسم الملف:\n\nالاسم الحالي: ' + oldName + '\n\nأدخل الاسم الجديد:', oldName);
-            if (newName && newName.trim() !== '' && newName.trim() !== oldName) {
-                fetch(`${API_URL}?action=renameFile&fileId=${fileId}&newName=${encodeURIComponent(newName.trim())}`)
-                    .then(res => res.json())
-                    .then(data => { if (data.success) { alert('✅ تم التعديل!'); loadClientFiles(); } else { alert('فشل: ' + data.error); } })
-                    .catch(() => alert('خطأ'));
-            }
-        }
+            const currentFile = filesData.find(f => f.id === currentFileId);
+            if (!currentFile) return;
 
-        // ====== حذف ======
-        function deleteFile(fileId, fileName) {
-            if (confirm('حذف "' + fileName + '"؟')) {
-                fetch(`${API_URL}?action=deleteFile&fileId=${fileId}`)
-                    .then(res => res.json())
-                    .then(data => { if (data.success) { loadClientFiles(); } else { alert('فشل: ' + data.error); } });
-            }
-        }
+            const newDoc = {
+                id: Date.now() + Math.random() * 1000,
+                name: name,
+                type: type
+            };
+            currentFile.documents.push(newDoc);
+            renderDocuments(currentFile.documents);
+            // إخفاء النموذج وإعادة تعيينه
+            addForm.classList.remove('show');
+            docNameInput.value = '';
+            docTypeSelect.value = 'PDF';
+        }
 
-        // ====== رفع الملفات ======
-        function uploadFiles() { document.getElementById('fileInput').click(); }
+        // إغلاق المودال
+        function closeModal() {
+            modalOverlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentFileId = null;
+            // إخفاء نموذج الإضافة
+            addForm.classList.remove('show');
+        }
 
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            var files = e.target.files;
-            if (!files.length) return;
-            for (var i = 0; i < files.length; i++) { uploadSingleFile(files[i]); }
-            e.target.value = '';
-        });
+        // ==============================
+        // 5. أحداث تسجيل الدخول والخروج
+        // ==============================
+        function login() {
+            const entered = passwordInput.value.trim();
+            errorMsg.textContent = '';
 
-        function uploadSingleFile(file) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var base64 = e.target.result.split(',')[1];
-                var formData = new FormData();
-                formData.append('action', 'uploadFile');
-                formData.append('category', currentFile);
-                formData.append('clientName', currentClient);
-                formData.append('fileName', file.name);
-                formData.append('fileBase64', base64);
-                formData.append('mimeType', file.type);
-                fetch(API_URL, { method: 'POST', body: formData })
-                    .then(res => res.json())
-                    .then(data => { if (data.success) { loadClientFiles(); } else { alert('فشل الرفع: ' + data.error); } })
-                    .catch(() => alert('خطأ في الرفع'));
-            };
-            reader.readAsDataURL(file);
-        }
-    </script>
+            if (entered === CORRECT_PASSWORD) {
+                loginScreen.style.display = 'none';
+                filesScreen.style.display = 'block';
+                renderFiles();
+                passwordInput.value = '';
+                errorMsg.textContent = '';
+            } else {
+                errorMsg.textContent = '❌ كلمة السر غير صحيحة، حاول مرة أخرى.';
+                passwordInput.value = '';
+                passwordInput.focus();
+                passwordInput.style.animation = 'shake 0.4s ease';
+                setTimeout(() => passwordInput.style.animation = '', 500);
+            }
+        }
+
+        function logout() {
+            filesScreen.style.display = 'none';
+            loginScreen.style.display = 'flex';
+            passwordInput.value = '';
+            errorMsg.textContent = '';
+            // إغلاق المودال إن كان مفتوحاً
+            closeModal();
+            setTimeout(() => passwordInput.focus(), 100);
+        }
+
+        // ==============================
+        // 6. ربط الأحداث
+        // ==============================
+        loginBtn.addEventListener('click', login);
+        passwordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                login();
+            }
+        });
+        logoutBtn.addEventListener('click', logout);
+
+        // أزرار المودال
+        closeModalBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+
+        // زر إضافة مستند
+        addDocBtn.addEventListener('click', function() {
+            // تبديل ظهور النموذج
+            addForm.classList.toggle('show');
+            if (addForm.classList.contains('show')) {
+                docNameInput.focus();
+            }
+        });
+
+        // حفظ المستند
+        saveDocBtn.addEventListener('click', addDocument);
+
+        // إلغاء الإضافة
+        cancelAddBtn.addEventListener('click', function() {
+            addForm.classList.remove('show');
+            docNameInput.value = '';
+            docTypeSelect.value = 'PDF';
+        });
+
+        // الضغط على Enter في حقل الاسم يحفظ
+        docNameInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addDocument();
+            }
+        });
+
+        // ==============================
+        // 7. تأثير الهز (لخطأ كلمة السر)
+        // ==============================
+        const styleShake = document.createElement('style');
+        styleShake.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(styleShake);
+
+        // ==============================
+        // 8. بداية التشغيل
+        // ==============================
+        window.addEventListener('load', function() {
+            passwordInput.focus();
+        });
+
+        console.log('✅ النظام جاهز. كلمة السر: ' + CORRECT_PASSWORD);
+        console.log('📂 عدد الملفات: ' + filesData.length);
+        console.log('💡 اضغط على أي ملف لفتحه وعرض مستنداته، ويمكنك إضافة مستندات جديدة.');
+    })();
+</script>
+
 </body>
 </html>
-
