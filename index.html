@@ -958,4 +958,320 @@ body {
 
             card.querySelector('.rename-folder').addEventListener('click', e => {
                 e.stopPropagation();
-                showInputModal('✏️ إعادة تسم
+                showInputModal('✏️ إعادة تسمية الملف', 'الاسم الجديد', 'اكتب الاسم الجديد', folder.name, newName => {
+                    folder.name = newName;
+                    renderFiles();
+                    if (currentFolderId === folder.id) {
+                        modalTitle.innerHTML = `${folder.icon} ${folder.name}`;
+                    }
+                });
+            });
+
+            card.querySelector('.delete-folder').addEventListener('click', e => {
+                e.stopPropagation();
+                if (folder.files.length > 0) {
+                    if (!confirm(`⚠️ الملف "${folder.name}" يحتوي على ${folder.files.length} ملف. هل تريد حذفه مع كل محتوياته؟`)) return;
+                } else {
+                    if (!confirm(`هل تريد حذف الملف "${folder.name}"؟`)) return;
+                }
+                const idx = filesData.findIndex(f => f.id === folder.id);
+                if (idx !== -1) filesData.splice(idx, 1);
+                renderFiles();
+            });
+
+            fileGrid.appendChild(card);
+        });
+    }
+
+    function openFolder(folderId) {
+        const folder = filesData.find(f => f.id === folderId);
+        if (!folder) return;
+
+        currentFolderId = folderId;
+        modalTitle.innerHTML = `${folder.icon} ${folder.name}`;
+        renderCurrentFolderFiles();
+        uploadProgress.classList.remove('show');
+        progressFill.style.width = '0%';
+        modalOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function renderCurrentFolderFiles() {
+        const folder = filesData.find(f => f.id === currentFolderId);
+        if (!folder) return;
+
+        filesList.innerHTML = '';
+
+        if (!folder.files || folder.files.length === 0) {
+            filesList.innerHTML = `<div class="empty-files">📭 لا توجد ملفات في هذا المجلد حتى الآن<br><small>اضغط على "رفع ملف" لإضافة ملفات جديدة</small></div>`;
+            return;
+        }
+
+        folder.files.forEach(file => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.style.setProperty('--file-color', folder.color);
+
+            const icon = getFileIcon(file.name, file.mimeType);
+            const sizeText = file.size ? formatFileSize(file.size) : '';
+            const typeText = getFileType(file.name, file.mimeType);
+
+            item.innerHTML = `
+                <div class="file-info">
+                    <span class="file-icon">${icon}</span>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${typeText}${sizeText ? ' • ' + sizeText : ''}</span>
+                </div>
+                <div class="file-actions">
+                    <button class="view-file" title="عرض">👁️ عرض</button>
+                    <button class="download-file" title="تحميل">⬇️ تحميل</button>
+                    <button class="rename-file" title="إعادة تسمية">✏️ تسمية</button>
+                    <button class="move-file" title="نقل">🔄 نقل</button>
+                    <button class="delete-file" title="حذف">🗑️ حذف</button>
+                </div>
+            `;
+
+            // عرض/فتح الملف
+            item.querySelector('.view-file').addEventListener('click', () => {
+                if (file.url) {
+                    window.open(file.url, '_blank');
+                } else if (file.dataUrl) {
+                    window.open(file.dataUrl, '_blank');
+                } else {
+                    alert('⚠️ لا يمكن عرض هذا الملف. قد يكون الرابط غير متوفر.');
+                }
+            });
+
+            // تحميل الملف
+            item.querySelector('.download-file').addEventListener('click', () => {
+                const link = document.createElement('a');
+                if (file.url) {
+                    link.href = file.url;
+                } else if (file.dataUrl) {
+                    link.href = file.dataUrl;
+                } else {
+                    alert('⚠️ لا يمكن تحميل هذا الملف.');
+                    return;
+                }
+                link.download = file.name;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            // إعادة التسمية
+            item.querySelector('.rename-file').addEventListener('click', () => {
+                showInputModal('✏️ إعادة تسمية الملف', 'الاسم الجديد', 'اكتب الاسم الجديد', file.name, newName => {
+                    file.name = newName;
+                    renderCurrentFolderFiles();
+                });
+            });
+
+            // نقل
+            item.querySelector('.move-file').addEventListener('click', () => {
+                if (filesData.length < 2) {
+                    alert('⚠️ لا توجد مجلدات أخرى للنقل إليها.');
+                    return;
+                }
+                currentFileForMove = file;
+                showMoveModal();
+            });
+
+            // حذف
+            item.querySelector('.delete-file').addEventListener('click', () => {
+                if (!confirm(`هل تريد حذف الملف "${file.name}" نهائياً؟`)) return;
+                const idx = folder.files.findIndex(f => f.id === file.id);
+                if (idx !== -1) folder.files.splice(idx, 1);
+                renderCurrentFolderFiles();
+                renderFiles();
+            });
+
+            filesList.appendChild(item);
+        });
+    }
+
+    // ===========================================
+    // 9. رفع الملفات
+    // ===========================================
+    function handleFileUpload(files) {
+        const folder = filesData.find(f => f.id === currentFolderId);
+        if (!folder) return;
+
+        uploadProgress.classList.add('show');
+        let uploadedCount = 0;
+        const totalFiles = files.length;
+
+        Array.from(files).forEach(file => {
+            uploadStatus.textContent = `جاري رفع: ${file.name}...`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                
+                const newFile = {
+                    id: Date.now() + Math.random() * 1000,
+                    name: file.name,
+                    size: file.size,
+                    mimeType: file.type,
+                    dataUrl: dataUrl,
+                    url: dataUrl,
+                    uploadedAt: new Date().toISOString()
+                };
+
+                folder.files.push(newFile);
+                uploadedCount++;
+
+                const progress = Math.round((uploadedCount / totalFiles) * 100);
+                progressFill.style.width = progress + '%';
+                uploadStatus.textContent = `تم رفع ${uploadedCount} من ${totalFiles} ملف...`;
+
+                // محاولة رفع إلى Google Drive (في الخلفية)
+                uploadToDrive(file, folder.name).catch(err => {
+                    console.warn('لم يتم الرفع إلى Drive:', err);
+                });
+
+                if (uploadedCount === totalFiles) {
+                    uploadStatus.textContent = '✅ تم رفع جميع الملفات بنجاح!';
+                    progressFill.style.width = '100%';
+                    setTimeout(() => {
+                        uploadProgress.classList.remove('show');
+                        progressFill.style.width = '0%';
+                    }, 2000);
+                    renderCurrentFolderFiles();
+                    renderFiles();
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function uploadToDrive(file, folderName) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folderName', folderName);
+
+            await fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            });
+            console.log('✅ تم رفع الملف إلى Drive:', file.name);
+        } catch (err) {
+            console.warn('⚠️ فشل رفع الملف إلى Drive:', err);
+        }
+    }
+
+    // ===========================================
+    // 10. إنشاء مجلد جديد
+    // ===========================================
+    createFolderBtn.addEventListener('click', function() {
+        showInputModal('➕ إنشاء ملف جديد', 'اسم الملف', 'مثال: ملف الأحوال الشخصية', '', name => {
+            const colors = ['#c0392b', '#2980b9', '#e67e22', '#27ae60', '#16a085', '#8e44ad', '#f39c12', '#d35400'];
+            const icons = ['📁', '📂', '🗂️', '📋', '📊', '📑', '🗃️', '📌'];
+            const newFolder = {
+                id: Date.now(),
+                name: name,
+                description: 'ملف جديد',
+                icon: icons[Math.floor(Math.random() * icons.length)],
+                color: colors[Math.floor(Math.random() * colors.length)],
+                files: []
+            };
+            filesData.push(newFolder);
+            renderFiles();
+        });
+    });
+
+    // ===========================================
+    // 11. أحداث المودال
+    // ===========================================
+    closeModalBtn.addEventListener('click', function() {
+        modalOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        currentFolderId = null;
+    });
+
+    modalOverlay.addEventListener('click', function(e) {
+        if (e.target === modalOverlay) {
+            modalOverlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentFolderId = null;
+        }
+    });
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleFileUpload(e.target.files);
+            fileInput.value = '';
+        }
+    });
+
+    // ===========================================
+    // 12. تسجيل الدخول والخروج
+    // ===========================================
+    function login() {
+        const entered = passwordInput.value.trim();
+        errorMsg.textContent = '';
+
+        if (entered === CORRECT_PASSWORD) {
+            loginScreen.style.display = 'none';
+            filesScreen.style.display = 'block';
+            renderFiles();
+            passwordInput.value = '';
+            errorMsg.textContent = '';
+        } else {
+            errorMsg.textContent = '❌ كلمة السر غير صحيحة، حاول مرة أخرى.';
+            passwordInput.value = '';
+            passwordInput.focus();
+            passwordInput.style.animation = 'shake 0.4s ease';
+            setTimeout(() => passwordInput.style.animation = '', 500);
+        }
+    }
+
+    function logout() {
+        filesScreen.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        passwordInput.value = '';
+        errorMsg.textContent = '';
+        modalOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        currentFolderId = null;
+        setTimeout(() => passwordInput.focus(), 100);
+    }
+
+    loginBtn.addEventListener('click', login);
+    passwordInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); login(); }
+    });
+    logoutBtn.addEventListener('click', logout);
+
+    // ===========================================
+    // 13. تأثير الهز
+    // ===========================================
+    const styleShake = document.createElement('style');
+    styleShake.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    `;
+    document.head.appendChild(styleShake);
+
+    // ===========================================
+    // 14. بداية التشغيل
+    // ===========================================
+    window.addEventListener('load', function() {
+        passwordInput.focus();
+    });
+
+    console.log('✅ النظام جاهز. كلمة السر: ' + CORRECT_PASSWORD);
+    console.log('📂 عدد الملفات الافتراضية: ' + filesData.length);
+})();
+</script>
+
+</body>
+</html>
